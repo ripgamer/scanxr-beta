@@ -6,8 +6,8 @@ import ARButton from "@/components/ARButton";
 
 export default function Home() {
   return (
-    <div>
-      <ARButton gltfUrl="https://cyberpunkaakash.vercel.app/DamagedHelmet.gltf" buttonText="View Helmet in AR" />
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+     
 
       {/* <AFrameScene gltfUrl={"https://cyberpunkaakash.vercel.app/DamagedHelmet.gltf"} /> */}
       {/* <Arcard /> */}
@@ -15,6 +15,9 @@ export default function Home() {
       <h1 className="text-3xl font-bold mb-8">Try AR!</h1>
       <ARButton gltfUrl="https://cyberpunkaakash.vercel.app/DamagedHelmet.gltf" buttonText="View Helmet in AR" />
     </div> */}
+      <h1 className="text-3xl font-bold mb-8">Try AR!</h1>
+      <ARButton gltfUrl="https://example.com/models/helmet.glb" buttonText="View Helmet in AR" />
+   
     </div>
     
 
