@@ -16,7 +16,7 @@ export default function Home() {
       <ARButton gltfUrl="https://cyberpunkaakash.vercel.app/DamagedHelmet.gltf" buttonText="View Helmet in AR" />
     </div> */}
       <h1 className="text-3xl font-bold mb-8">Try AR!</h1>
-      <ARButton gltfUrl="https://example.com/models/helmet.glb" buttonText="View Helmet in AR" />
+      <ARButton gltfUrl="https://cyberpunkaakash.vercel.app/DamagedHelmet.gltf" buttonText="View Helmet in AR" />
    
     </div>
     
