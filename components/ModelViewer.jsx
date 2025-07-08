@@ -25,7 +25,7 @@ const ModelViewer = ({ gltfUrl, usdzUrl, alt = '3D model' }) => {
         {...(usdzUrl ? { 'ios-src': usdzUrl } : {})}
         alt={alt}
         ar
-        ar-modes="webxr scene-viewer quick-look"
+        ar-modes="scene-viewer quick-look webxr"
         camera-controls
         auto-rotate
         environment-image="neutral"
