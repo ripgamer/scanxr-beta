@@ -14,7 +14,7 @@ const ModelViewer = ({ gltfUrl, usdzUrl, alt = '3D model' }) => {
   
       if (isAndroid) {
         const sceneViewerUrl = `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(gltfUrl)}&mode=ar_preferred#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;S.browser_fallback_url=${encodeURIComponent(
-          fallbackUrl || gltfUrl
+          gltfUrl
         )};end;`;
         window.location.href = sceneViewerUrl;
       } else if (isIOS && usdzUrl) {
