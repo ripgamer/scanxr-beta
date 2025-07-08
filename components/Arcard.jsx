@@ -30,23 +30,29 @@ export default function Arcard() {
   if (!scriptsLoaded) return null; // Prevent SSR and render only after scripts are loaded
 
   return (
-    <div className='items-center flex w-96 '>
-       <div className='overflow-hidden'>
-        
-    
-       <a-scene embedded arjs vr-mode-ui="enabled: false">
-      <a-marker preset="hiro">
-        <a-entity
-          position="0 0 0"
-          scale="0.5 0.5 0.5"
-          gltf-model="https://cyberpunkaakash.vercel.app/DamagedHelmet.gltf"
-          animation-mixer="clip: Waving"
-        ></a-entity>
-      </a-marker>
-      <a-entity camera></a-entity>
-    </a-scene>
-    </div>
+    <div className=''>
+   
 
-    </div>
+
+   <a-scene
+        vr-mode-ui="enabled: false;"
+        renderer="logarithmicDepthBuffer: true;"
+        embedded
+        arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false;"
+      >
+          
+
+          <a-entity  gltf-model="https://cyberpunkaakash.vercel.app/DamagedHelmet.gltf"
+          scale=".5 .5 .5"
+          position="0 1 -1"
+          >
+            
+          </a-entity>
+        </a-scene>
+          
+        
+   
+
+    </div >
   );
 } 

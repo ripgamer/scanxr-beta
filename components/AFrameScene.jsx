@@ -36,7 +36,24 @@ const AFrameScene = ({ gltfUrl }) => {
       }
 
       // ARButton
-      document.body.appendChild(ARButton.createButton(renderer, { requiredFeatures: ['hit-test'] }));
+      // Start AR session immediately
+      if (navigator.xr && navigator.xr.isSessionSupported) {
+        navigator.xr.isSessionSupported('immersive-ar').then((supported) => {
+          if (supported) {
+            navigator.xr.requestSession('immersive-ar', { requiredFeatures: ['hit-test'] })
+              .then((session) => {
+                renderer.xr.setSession(session);
+              })
+              .catch((err) => {
+                console.error('Failed to start AR session:', err);
+              });
+          } else {
+            console.error('WebXR immersive-ar is not supported on this device/browser.');
+          }
+        });
+      } else {
+        console.error('WebXR not available in this browser.');
+      }
 
       // Reticle
       reticle = new THREE.Mesh(
