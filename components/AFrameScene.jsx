@@ -1,21 +1,26 @@
-// components/ThreeXRHitTestScene.jsx
+// components/AFrameScene.jsx
 'use client';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
-const ThreeXRHitTestScene = () => {
+const AFrameScene = ({ gltfUrl }) => {
   const containerRef = useRef(null);
+  const [modelLoading, setModelLoading] = useState(false);
+  const [modelError, setModelError] = useState(null);
 
   useEffect(() => {
     let renderer, scene, camera, controller, reticle;
     let hitTestSource = null;
     let hitTestSourceRequested = false;
     let animationId;
+    let gltfLoader, loadedGltf = null;
+    let cleanupFns = [];
 
     // Dynamically import Three.js modules
     Promise.all([
       import('three'),
-      import('three/examples/jsm/webxr/ARButton.js')
-    ]).then(([THREE, { ARButton }]) => {
+      import('three/examples/jsm/webxr/ARButton.js'),
+      import('three/examples/jsm/loaders/GLTFLoader.js')
+    ]).then(async ([THREE, { ARButton }, { GLTFLoader }]) => {
       scene = new THREE.Scene();
       camera = new THREE.PerspectiveCamera();
 
@@ -47,21 +52,38 @@ const ThreeXRHitTestScene = () => {
       light.position.set(0.5, 1, 0.25);
       scene.add(light);
 
+      // GLTF Loader
+      gltfLoader = new GLTFLoader();
+
       // Controller for tap input
       controller = renderer.xr.getController(0);
-      controller.addEventListener('select', () => {
-        if (reticle.visible) {
-          const geometry = new THREE.BoxGeometry(0.1, 0.1, 0.1);
-          const material = new THREE.MeshPhongMaterial({ color: Math.random() * 0xffffff });
-          const mesh = new THREE.Mesh(geometry, material);
-          mesh.position.setFromMatrixPosition(reticle.matrix);
-          mesh.quaternion.setFromRotationMatrix(reticle.matrix);
-          scene.add(mesh);
+      controller.addEventListener('select', async () => {
+        if (reticle.visible && gltfUrl) {
+          try {
+            let model;
+            if (!loadedGltf) {
+              setModelLoading(true);
+              setModelError(null);
+              const gltf = await gltfLoader.loadAsync(gltfUrl);
+              loadedGltf = gltf;
+              setModelLoading(false);
+            }
+            // Clone the loaded model for each placement
+            model = loadedGltf.scene.clone(true);
+            model.position.setFromMatrixPosition(reticle.matrix);
+            model.quaternion.setFromRotationMatrix(reticle.matrix);
+            model.scale.set(0.2, 0.2, 0.2); // Adjust scale as needed
+            scene.add(model);
+          } catch (err) {
+            setModelLoading(false);
+            setModelError('Failed to load model');
+          }
         }
       });
       scene.add(controller);
 
       window.addEventListener('resize', onWindowResize);
+      cleanupFns.push(() => window.removeEventListener('resize', onWindowResize));
 
       function onWindowResize() {
         renderer.setSize(window.innerWidth, window.innerHeight);
@@ -106,35 +128,66 @@ const ThreeXRHitTestScene = () => {
 
       // Clean up on unmount
       animationId = renderer.setAnimationLoop(render);
-    });
-
-    return () => {
-      if (renderer) {
-        renderer.setAnimationLoop(null);
+      cleanupFns.push(() => renderer.setAnimationLoop(null));
+      cleanupFns.push(() => {
         if (renderer.domElement && renderer.domElement.parentNode) {
           renderer.domElement.parentNode.removeChild(renderer.domElement);
         }
-      }
-      window.removeEventListener('resize', () => {});
-      if (animationId) cancelAnimationFrame(animationId);
+      });
+    });
+
+    return () => {
+      cleanupFns.forEach(fn => fn());
     };
-  }, []);
+  }, [gltfUrl]);
 
   return (
-    <div
-      ref={containerRef}
-      style={{
-        width: '100vw',
-        height: '100vh',
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        background: '#000',
-        overflow: 'hidden',
-        zIndex: 0
-      }}
-    />
+    <>
+      <div
+        ref={containerRef}
+        style={{
+          width: '100vw',
+          height: '100vh',
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          background: '#000',
+          overflow: 'hidden',
+          zIndex: 0
+        }}
+      />
+      {modelLoading && (
+        <div style={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          color: 'white',
+          backgroundColor: 'rgba(0,0,0,0.8)',
+          padding: '20px',
+          borderRadius: '10px',
+          zIndex: 10
+        }}>
+          Loading model...
+        </div>
+      )}
+      {modelError && (
+        <div style={{
+          position: 'absolute',
+          top: '60%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          color: 'red',
+          backgroundColor: 'rgba(0,0,0,0.8)',
+          padding: '20px',
+          borderRadius: '10px',
+          zIndex: 10
+        }}>
+          {modelError}
+        </div>
+      )}
+    </>
   );
 };
 
-export default ThreeXRHitTestScene;
+export default AFrameScene;

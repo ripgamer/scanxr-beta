@@ -6,7 +6,7 @@ import AFrameScene from "../components/AFrameScene"
 export default function Home() {
   return (
     <div>
-      <AFrameScene />
+      <AFrameScene gltfUrl={"https://cyberpunkaakash.vercel.app/DamagedHelmet.gltf"} />
       {/* <Arcard /> */}
     </div>
     
