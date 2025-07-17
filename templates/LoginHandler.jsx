@@ -2,16 +2,11 @@
 import { useUser } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
+import { SignInButton } from '@clerk/nextjs';
 
 export function LoginHandler({ children }) {
   const { user, isLoaded } = useUser()
   const router = useRouter()
-
-  useEffect(() => {
-    if (isLoaded && !user) {
-      router.push('/sign-in')
-    }
-  }, [isLoaded, user, router])
 
   if (!isLoaded) {
     return (
@@ -28,7 +23,9 @@ export function LoginHandler({ children }) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <p className="text-gray-600">Redirecting to sign in...</p>
+          <SignInButton mode="modal">
+            <button className="bg-primary text-white px-4 py-2 rounded">Sign In</button>
+          </SignInButton>
         </div>
       </div>
     )

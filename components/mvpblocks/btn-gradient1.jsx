@@ -6,12 +6,12 @@ export default function Btn09({ as = "button", children, ...props }) {
     <Comp
       {...props}
       className={
-        "group relative inline-flex items-center justify-center overflow-hidden rounded-md bg-primary px-8 py-2.5 tracking-tighter text-white " +
+        "group relative inline-flex items-center justify-center overflow-hidden rounded-md bg-primary tracking-tighter text-white " +
         (props.className || "")
       }
     >
-      <span className="absolute h-0 w-0 rounded-full bg-orange-600 transition-all duration-500 ease-out group-hover:h-56 group-hover:w-56"></span>
-      <span className="absolute bottom-0 left-0 -ml-2 h-full">
+      <span className="absolute h-0 w-0 rounded-full bg-orange-600 transition-all duration-500 ease-out group-hover:h-56 group-hover:w-56 hidden md:block"></span>
+      <span className="absolute bottom-0 left-0 -ml-2 h-full hidden md:block">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           className="object-stretch h-full w-auto opacity-100"
@@ -25,7 +25,7 @@ export default function Btn09({ as = "button", children, ...props }) {
           ></path>
         </svg>
       </span>
-      <span className="absolute right-0 top-0 -mr-3 h-full w-12">
+      <span className="absolute right-0 top-0 -mr-3 h-full w-12 hidden md:block">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           className="h-full w-full object-cover"
@@ -39,7 +39,7 @@ export default function Btn09({ as = "button", children, ...props }) {
           ></path>
         </svg>
       </span>
-      <span className="absolute inset-0 -mt-1 h-full w-full rounded-lg bg-gradient-to-b from-transparent via-transparent to-gray-200 opacity-30"></span>
+      <span className="absolute inset-0 -mt-1 h-full w-full rounded-lg bg-gradient-to-b from-transparent via-transparent to-gray-200 opacity-30 hidden md:block"></span>
       <span className="relative text-base font-semibold">{children}</span>
     </Comp>
   );

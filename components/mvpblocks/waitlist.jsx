@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { ArrowRight, Sparkles, Code, Star, ExternalLink } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Particles } from '../ui/particles';
@@ -11,7 +11,7 @@ import { useTheme } from 'next-themes';
 import { Bricolage_Grotesque } from 'next/font/google';
 import { cn } from '../../lib/utils';
 import Btn09 from './btn-gradient1';
-import { useUser, SignIn } from '@clerk/nextjs';
+import { useUser, SignIn, SignUpButton } from '@clerk/nextjs';
 
 const brico = Bricolage_Grotesque({
   subsets: ['latin'],
@@ -46,6 +46,16 @@ export default function WaitlistPage() {
     setSubmitted(true);
     setIsSubmitting(false);
   };
+
+  const dotPositions = useMemo(
+    () => Array.from({ length: 20 }).map(() => ({
+      top: Math.random() * 100,
+      left: Math.random() * 100,
+      delay: Math.random() * 2,
+      duration: 3 + Math.random() * 2,
+    })),
+    []
+  );
 
   return (
     <main className="relative flex min-h-screen w-full items-center justify-center overflow-hidden xl:h-screen">
@@ -155,15 +165,6 @@ export default function WaitlistPage() {
           </div>
         </motion.div>
         {/* Centered Get Started Button and Modal for NOT signed in users */}
-        {!isSignedIn && (
-          <>
-            <motion.div initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.7 }} className="flex justify-center mb-8">
-              <Btn09 as="a" href="/sign-in">Get Started</Btn09>
-            </motion.div>
-          </>
-        )}
 
 
         {/* <motion.form

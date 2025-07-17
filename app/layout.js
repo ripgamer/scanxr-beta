@@ -10,6 +10,9 @@ import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
 import NavBar from '../components/NavBar'
 import RippleWaveLoader from "../components/mvpblocks/ripple-loader"
+import TopNavBar from '@/components/TopNavBar'
+import Component from '@/components/comp-586'
+import { ThemeProvider } from "@/components/theme-provider"
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -29,18 +32,23 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <ClerkProvider>
-      <html lang="en">
+      <html lang="en" suppressHydrationWarning>
         <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-          <header className="">
-            <NavBar></NavBar>
-            
-            
-            
-          </header>
-          <RippleWaveLoader/>
-          {children}
+          <ThemeProvider
+            attribute="class" // or "body" if you want to avoid <html> class mismatch
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <header>
+              <Component />
+              <NavBar />
+            </header>
+            <RippleWaveLoader />
+            {children}
+          </ThemeProvider>
         </body>
       </html>
     </ClerkProvider>
-  )
+  );
 }
