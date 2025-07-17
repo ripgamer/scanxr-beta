@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import Head from 'next/head';
 
 // Dynamically import ARScene to avoid SSR issues
-const AFrameScene = dynamic(() => import('../components/AFrameScene'), { 
+const AFrameScene = dynamic(() => import('../templates/AFrameScene'), { 
   ssr: false,
   loading: () => (
     <div style={{

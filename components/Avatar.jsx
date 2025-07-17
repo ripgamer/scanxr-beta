@@ -1,61 +1,62 @@
 // components/Avatar.jsx
-import { AvatarCreator } from '@readyplayerme/react-avatar-creator';
+import { AvatarCreator } from '@readyplayerme/react-avatar-creator'
 
-export function Avatar({ onAvatarCreated, existingAvatarUrl }) {
-  // Extract avatar ID from existing URL for editing
+export function Avatar({
+  userId,
+  avatarUrl,
+  onAvatarUpdated,
+  supabaseClient
+}) {
+  // Extract avatar ID from existing URL
   const getAvatarIdFromUrl = (url) => {
-    if (!url || typeof url !== 'string') return null;
-    
-    try {
-      // Handle different Ready Player Me URL formats
-      const patterns = [
-        /\/([a-f0-9-]{36})\.glb$/i,  // Standard UUID format
-        /\/([a-f0-9-]+)\.glb$/i,     // Your original pattern
-        /models\.readyplayer\.me\/([a-f0-9-]+)/i, // Alternative extraction
-      ];
-      
-      for (const pattern of patterns) {
-        const match = url.match(pattern);
-        if (match && match[1]) {
-          console.log(`Extracted avatar ID: ${match[1]} from URL: ${url}`);
-          return match[1];
-        }
-      }
-      
-      console.warn(`Could not extract avatar ID from URL: ${url}`);
-      return null;
-    } catch (error) {
-      console.error('Error extracting avatar ID:', error);
-      return null;
-    }
-  };
+    if (!url || typeof url !== 'string') return null
 
-  const avatarId = getAvatarIdFromUrl(existingAvatarUrl);
+    const patterns = [
+      /\/([a-f0-9-]{36})\.glb$/i,
+      /\/([a-f0-9-]+)\.glb$/i,
+      /models\.readyplayer\.me\/([a-f0-9-]+)/i,
+    ]
+
+    for (const pattern of patterns) {
+      const match = url.match(pattern)
+      if (match && match[1]) return match[1]
+    }
+
+    return null
+  }
+
+  const avatarId = getAvatarIdFromUrl(avatarUrl)
 
   const config = {
-    clearCache: false, // Set to false when editing existing avatar
+    clearCache: false,
     bodyType: 'fullbody',
     quickStart: false,
     language: 'en',
-    // If we have an existing avatar ID, use it for editing
-    ...(avatarId && { avatarId: avatarId }),
-  };
+    ...(avatarId && { avatarId })
+  }
 
-  const style = { 
-    width: '100%', 
-    height: '600px', 
+  const style = {
+    width: '100%',
+    height: '600px',
     border: 'none',
     borderRadius: '8px'
-  };
+  }
 
-  const handleOnAvatarExported = (event) => {
-    console.log(`Avatar URL is: ${event.data.url}`);
-    
-    // Call the parent component's callback with the avatar URL
-    if (onAvatarCreated) {
-      onAvatarCreated(event.data.url);
+  const handleOnAvatarExported = async (event) => {
+    const newAvatarUrl = event.data.url
+
+    // Update Supabase with the new avatar URL
+    const { data, error } = await supabaseClient
+      .from('profile')
+      .update({ avatar_url: newAvatarUrl })
+      .eq('user_id', userId)
+      .select()
+      .single()
+
+    if (!error && onAvatarUpdated) {
+      onAvatarUpdated(data)
     }
-  };
+  }
 
   return (
     <div className="w-full">
@@ -66,14 +67,12 @@ export function Avatar({ onAvatarCreated, existingAvatarUrl }) {
           </p>
         </div>
       )}
-      <AvatarCreator 
-        subdomain="scanxr" 
-        config={config} 
-        style={style} 
-        onAvatarExported={handleOnAvatarExported} 
+      <AvatarCreator
+        subdomain="scanxr"
+        config={config}
+        style={style}
+        onAvatarExported={handleOnAvatarExported}
       />
     </div>
-  );
+  )
 }
-
-export default Avatar;
