@@ -119,7 +119,7 @@
     ".next/types/**/*.ts",
     "**/*.ts",
     "**/*.tsx"
-  ],
+, "components/mvpblocks/team-2.jsx"  ],
   "exclude": [
     "node_modules"
   ]

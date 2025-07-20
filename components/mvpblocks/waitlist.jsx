@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { useState, useEffect, useMemo } from 'react';
 import { ArrowRight, Sparkles, Code, Star, ExternalLink } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Particles } from '../ui/particles';
 import { Spotlight } from '../ui/spotlight';
 import { useTheme } from 'next-themes';
 import { Bricolage_Grotesque } from 'next/font/google';
@@ -60,14 +59,6 @@ export default function WaitlistPage() {
   return (
     <main className="relative flex min-h-screen w-full items-center justify-center overflow-hidden xl:h-screen">
       <Spotlight />
-
-      <Particles
-        className="absolute inset-0 z-0"
-        quantity={100}
-        ease={80}
-        refresh
-        color={color}
-      />
 
       <div className="relative z-[100] mx-auto max-w-2xl px-10 py-0 mt-0 text-center">
         {/* Badge */}

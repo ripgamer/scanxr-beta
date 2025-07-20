@@ -2,7 +2,11 @@
 import { useEffect, useState } from 'react';
 import { useSession, useUser } from '@clerk/nextjs';
 import { createClient } from '@supabase/supabase-js';
-import { Avatar } from '@/components/Avatar';
+
+
+import dynamic from 'next/dynamic';
+import AvatarExample from '@/components/AvatarModel';
+// const VisageAvatar = dynamic(() => import('@/components/visage'), { ssr: false });
 
 export default function Profile() {
   const [userProfile, setUserProfile] = useState(null);
@@ -80,6 +84,8 @@ export default function Profile() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+<AvatarExample></AvatarExample>
+
       {showAvatarCreator && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-4xl max-h-[90vh] overflow-auto w-full mx-4">

@@ -13,6 +13,7 @@ import RippleWaveLoader from "../components/mvpblocks/ripple-loader"
 import TopNavBar from '@/components/TopNavBar'
 import Component from '@/components/comp-586'
 import { ThemeProvider } from "@/components/theme-provider"
+import GlobalParticles from '@/components/mvpblocks/GlobalParticles';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -40,12 +41,17 @@ export default function RootLayout({ children }) {
             enableSystem
             disableTransitionOnChange
           >
+            <GlobalParticles />
             <header>
               <Component />
               <NavBar />
+              
             </header>
             <RippleWaveLoader />
-            {children}
+            {/* Main content */}
+            <div style={{ position: 'relative', zIndex: 1 }}>
+              {children}
+            </div>
           </ThemeProvider>
         </body>
       </html>
