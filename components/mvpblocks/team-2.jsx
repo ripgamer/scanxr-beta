@@ -10,7 +10,7 @@ import { GithubIcon, LinkedinIcon, TwitterIcon } from 'lucide-react';
 const defaultMembers = [
   {
     name: 'Aakashdeep Kumar',
-    role: 'CEO & Co-Founder',
+    role: 'Devloper',
     imageUrl: '/team/aakash.png',
     socialLinks: [
       { platform: 'twitter', url: 'https://twitter.com' },
@@ -20,7 +20,7 @@ const defaultMembers = [
   },
   {
     name: 'Nandini Jagdade',
-    role: 'CFO & Co-Founder',
+    role: 'Team Lead and Database Manager',
     imageUrl: '/team/nandini.png',
     socialLinks: [
       { platform: 'twitter', url: 'https://twitter.com' },
@@ -30,7 +30,7 @@ const defaultMembers = [
   },
   {
     name: 'Sakshi Kapure',
-    role: 'Front-end Developer',
+    role: '',
     imageUrl: '/team/sakshi.png',
     socialLinks: [
       { platform: 'github', url: 'https://github.com' },
@@ -39,7 +39,7 @@ const defaultMembers = [
   },
   {
     name: 'Pramod Dwarkunde',
-    role: 'Front-end Developer',
+    role: 'Full Stack Developer',
     imageUrl: '/team/pramod.png',
     socialLinks: [
       { platform: 'twitter', url: 'https://twitter.com' },
