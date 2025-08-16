@@ -11,9 +11,10 @@ import './globals.css'
 import NavBar from '../components/NavBar'
 import RippleWaveLoader from "../components/mvpblocks/ripple-loader"
 import TopNavBar from '@/components/TopNavBar'
-import Component from '@/components/comp-586'
+import Component from '@/components/comp-586' //top nav bar
 import { ThemeProvider } from "@/components/theme-provider"
 import GlobalParticles from '@/components/mvpblocks/GlobalParticles';
+import { MantineProvider } from "@mantine/core";
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -41,17 +42,16 @@ export default function RootLayout({ children }) {
             enableSystem
             disableTransitionOnChange
           >
-            <GlobalParticles />
-            <header>
-              <Component />
-              <NavBar />
-              
-            </header>
-            <RippleWaveLoader />
-            {/* Main content */}
-            <div style={{ position: 'relative', zIndex: 1 }}>
-              {children}
-            </div>
+            <MantineProvider withGlobalStyles withNormalizeCSS>
+              <GlobalParticles />
+              <header>
+                <Component />
+                <NavBar />
+              </header>
+              <RippleWaveLoader />
+              {/* Main content */}
+              <div style={{ position: "relative", zIndex: 1 }}>{children}</div>
+            </MantineProvider>
           </ThemeProvider>
         </body>
       </html>

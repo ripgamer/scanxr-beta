@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useSession, useUser } from '@clerk/nextjs';
 import { createClient } from '@supabase/supabase-js';
+import AvatarModel from '@/components/AvatarModel';
 
 
 import dynamic from 'next/dynamic';
@@ -184,6 +185,7 @@ export default function Profile() {
           </div>
         </div>
       </div>
+      <AvatarModel></AvatarModel>
     </div>
   );
 } 

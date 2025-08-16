@@ -1,6 +1,7 @@
 import React from 'react'
 import { Input } from '@/components/ui/input'
 import { Search } from 'lucide-react'
+import Link from "next/link";
 
 function TopNavBar() {
   return (
@@ -8,8 +9,11 @@ function TopNavBar() {
       <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
         {/* Logo and Brand */}
         <div className="flex items-center gap-2">
-          <img src="/logo.svg" alt="ScanXR Logo" className="h-8 w-8" />
-          <span className="text-xl font-bold tracking-tight text-primary select-none">ScanXR</span>
+          <Link href="/">
+            <img src="/logo.svg" alt="ScanXR Logo" className="h-8 w-8" />
+            <span className="text-xl font-bold tracking-tight text-primary select-none">ScanXR</span>
+          </Link>
+          
         </div>
         {/* Search bar - only on large screens */}
         <div className="flex items-center gap-2 w-80">

@@ -11,6 +11,8 @@ import { Bricolage_Grotesque } from 'next/font/google';
 import { cn } from '../../lib/utils';
 import Btn09 from './btn-gradient1';
 import { useUser, SignIn, SignUpButton } from '@clerk/nextjs';
+// import explore from './explore';
+
 
 const brico = Bricolage_Grotesque({
   subsets: ['latin'],
