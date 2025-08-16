@@ -1,0 +1,19 @@
+{
+  "name": "ScanXR - 3D World Shared in Reality",
+  "short_name": "ScanXR",
+  "description": "Create, customize, and share immersive 3D experiences. Built by Aakashdeep Kumar, Nandini Jagdade, Sakshi Kapure, and Pramod Dwarkunde.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3b82f6",
+  "icons": [
+    {
+      "src": "/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ],
+  "categories": ["3D", "Technology", "AR/VR", "Creative Tools"],
+  "lang": "en",
+  "dir": "ltr"
+} 

@@ -1,36 +1,168 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# ScanXR - 3D World Shared in Reality
 
-## Getting Started
+A cutting-edge Next.js application that brings immersive 3D experiences to life through augmented reality and virtual reality technologies.
 
-First, run the development server:
+## 🚀 Project Overview
 
+ScanXR is an innovative platform that allows users to create, customize, and share 3D avatars and experiences. Built with modern web technologies, it provides a seamless bridge between the digital and physical worlds.
+
+## 👥 Team Members
+
+### **Aakashdeep Kumar** - Full Stack Developer & 3D Technology Specialist
+- **Role**: Expert in Next.js, React, and 3D web technologies
+- **Specialization**: Creating immersive 3D experiences and modern web applications
+- **Skills**: Frontend Development, 3D WebGL, React, Next.js
+
+### **Nandini Jagdade** - Team Lead & Database Architecture Manager
+- **Role**: Experienced team leader specializing in database design and project management
+- **Specialization**: Database architecture, system design, team leadership
+- **Skills**: Database Management, Project Management, System Architecture
+
+### **Sakshi Kapure** - UI/UX Designer & Frontend Developer
+- **Role**: Creative designer focused on user experience and interface design
+- **Specialization**: Creating intuitive and visually appealing 3D applications
+- **Skills**: UI/UX Design, Frontend Development, User Research
+
+### **Pramod Dwarkunde** - Full Stack Developer & Backend Specialist
+- **Role**: Backend development expert with strong server-side technology skills
+- **Specialization**: APIs, database management, scalable application development
+- **Skills**: Backend Development, API Design, Database Management
+
+## 🛠️ Technology Stack
+
+- **Frontend**: Next.js 15, React, Tailwind CSS
+- **3D Technology**: Three.js, WebGL, ReadyPlayer.me Integration
+- **Authentication**: Clerk
+- **Database**: Supabase (PostgreSQL)
+- **Styling**: Tailwind CSS, Framer Motion
+- **Deployment**: Vercel
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js 18+ 
+- npm or yarn
+- Supabase account
+- Clerk account
+
+### Installation
+
+1. Clone the repository:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/ripgamer/scanxr-beta.git
+cd scanxr-beta
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Install dependencies:
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+3. Set up environment variables:
+```bash
+# Create .env.local file
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_KEY=your_supabase_anon_key
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_key
+CLERK_SECRET_KEY=your_clerk_secret
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. Run the development server:
+```bash
+npm run dev
+```
 
-## Learn More
+5. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-To learn more about Next.js, take a look at the following resources:
+## 🌟 Features
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **3D Avatar Creation**: Customize and create unique 3D avatars
+- **Real-time 3D Rendering**: Interactive 3D models with WebGL
+- **User Authentication**: Secure user management with Clerk
+- **Responsive Design**: Mobile-first, responsive interface
+- **Dark/Light Theme**: Theme switching with system preference detection
+- **Particle Effects**: Dynamic background animations
+- **Team Collaboration**: Built by a diverse team of experts
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 📱 Pages & Components
 
-## Deploy on Vercel
+- **Home Page**: Landing page with hero section and team showcase
+- **Profile Page**: User profile management with avatar customization
+- **Authentication**: Sign-in and sign-up pages
+- **Team Section**: Team member profiles and information
+- **3D Model Viewer**: Interactive 3D model display
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🔧 Development
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Available Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run start` - Start production server
+- `npm run lint` - Run ESLint
+
+### Project Structure
+
+```
+scanxr-beta/
+├── app/                 # Next.js app directory
+├── components/          # Reusable components
+│   ├── mvpblocks/      # Main page components
+│   ├── ui/             # UI components
+│   └── ...             # Other components
+├── lib/                 # Utility functions
+├── public/              # Static assets
+└── prisma/              # Database schema
+```
+
+## 🌐 SEO & Meta Tags
+
+The application includes comprehensive SEO optimization:
+
+- **Meta Tags**: Title, description, keywords
+- **Open Graph**: Social media sharing optimization
+- **Twitter Cards**: Twitter-specific meta tags
+- **Structured Data**: Team member information
+- **Keywords**: 3D Technology, AR/VR, Team Members
+
+## 🚀 Deployment
+
+### Vercel (Recommended)
+
+1. Connect your GitHub repository to Vercel
+2. Set environment variables in Vercel dashboard
+3. Deploy automatically on push to main branch
+
+### Manual Deployment
+
+```bash
+npm run build
+npm run start
+```
+
+## 🤝 Contributing
+
+We welcome contributions! Please read our contributing guidelines and ensure you follow the project's coding standards.
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 📞 Contact
+
+- **Project**: ScanXR
+- **Team**: Aakashdeep Kumar, Nandini Jagdade, Sakshi Kapure, Pramod Dwarkunde
+- **Email**: [Your contact email]
+- **Website**: [https://scanxr-beta.vercel.app/](https://scanxr-beta.vercel.app/)
+
+## 🙏 Acknowledgments
+
+- ReadyPlayer.me for 3D avatar technology
+- Next.js team for the amazing framework
+- Supabase for database services
+- Clerk for authentication services
+- All contributors and supporters
+
+---
+
+**Built with ❤️ by the ScanXR Team**

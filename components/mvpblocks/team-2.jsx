@@ -10,7 +10,9 @@ import { GithubIcon, LinkedinIcon, TwitterIcon } from 'lucide-react';
 const defaultMembers = [
   {
     name: 'Aakashdeep Kumar',
-    role: 'Devloper',
+    role: 'Full Stack Developer & 3D Technology Specialist',
+    fullName: 'Aakashdeep Kumar',
+    description: 'Expert in Next.js, React, and 3D web technologies. Specializes in creating immersive 3D experiences and modern web applications.',
     imageUrl: '/team/aakash.png',
     socialLinks: [
       { platform: 'twitter', url: 'https://twitter.com' },
@@ -20,7 +22,9 @@ const defaultMembers = [
   },
   {
     name: 'Nandini Jagdade',
-    role: 'Team Lead and Database Manager',
+    role: 'Team Lead & Database Architecture Manager',
+    fullName: 'Nandini Jagdade',
+    description: 'Experienced team leader specializing in database design, project management, and system architecture. Leads the ScanXR development team.',
     imageUrl: '/team/nandini.png',
     socialLinks: [
       { platform: 'twitter', url: 'https://twitter.com' },
@@ -30,7 +34,9 @@ const defaultMembers = [
   },
   {
     name: 'Sakshi Kapure',
-    role: '',
+    role: 'UI/UX Designer & Frontend Developer',
+    fullName: 'Sakshi Kapure',
+    description: 'Creative designer focused on user experience and interface design. Specializes in creating intuitive and visually appealing 3D applications.',
     imageUrl: '/team/sakshi.png',
     socialLinks: [
       { platform: 'github', url: 'https://github.com' },
@@ -39,20 +45,21 @@ const defaultMembers = [
   },
   {
     name: 'Pramod Dwarkunde',
-    role: 'Full Stack Developer',
+    role: 'Full Stack Developer & Backend Specialist',
+    fullName: 'Pramod Dwarkunde',
+    description: 'Backend development expert with strong skills in server-side technologies, APIs, and database management for scalable applications.',
     imageUrl: '/team/pramod.png',
     socialLinks: [
       { platform: 'twitter', url: 'https://twitter.com' },
       { platform: 'github', url: 'https://github.com' },
     ],
   }
-  
 ];
 
 export default function Team2(props) {
   const {
-    title = 'Our people make us great',
-    subtitle = "You'll interact with talented professionals, will be challenged to solve difficult problems and think in new and creative ways.",
+    title = 'Meet the ScanXR Team - Aakashdeep Kumar, Nandini Jagdade, Sakshi Kapure, Pramod Dwarkunde',
+    subtitle = "Our talented team of developers, designers, and architects work together to create innovative 3D experiences. From frontend development to database architecture, we bring diverse expertise to build the future of immersive technology.",
     members = defaultMembers,
     className,
   } = props || {};
@@ -145,8 +152,11 @@ function TeamMemberCard({ member, index }) {
 
       {/* Name and role */}
       <div className="mt-4 text-center">
-        <h3 className="text-lg font-semibold">{member.name}</h3>
-        <p className="text-sm text-primary">{member.role}</p>
+        <h3 className="text-lg font-semibold">{member.fullName || member.name}</h3>
+        <p className="text-sm text-primary mb-2">{member.role}</p>
+        {member.description && (
+          <p className="text-xs text-muted-foreground leading-relaxed">{member.description}</p>
+        )}
       </div>
     </motion.div>
   );
