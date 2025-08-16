@@ -25,8 +25,9 @@ export default function Home() {
   return (
     <div className="">
       <WaitlistPage />
-      <Team2></Team2>
       <ModelViewer gltfUrl="https://modelviewer.dev/shared-assets/models/Astronaut.glb" />
+      <Team2></Team2>
+      
 
 
 
