@@ -4,8 +4,7 @@ import { AvatarCreator } from '@readyplayerme/react-avatar-creator'
 export function Avatar({
   userId,
   avatarUrl,
-  onAvatarUpdated,
-  supabaseClient
+  onAvatarUpdated
 }) {
   // Extract avatar ID from existing URL
   const getAvatarIdFromUrl = (url) => {
@@ -45,16 +44,29 @@ export function Avatar({
   const handleOnAvatarExported = async (event) => {
     const newAvatarUrl = event.data.url
 
-    // Update Supabase with the new avatar URL
-    const { data, error } = await supabaseClient
-      .from('profile')
-      .update({ avatar_url: newAvatarUrl })
-      .eq('user_id', userId)
-      .select()
-      .single()
+    try {
+      // Update profile using the new API
+      const response = await fetch('/api/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          user_id: userId,
+          avatar_url: newAvatarUrl,
+        }),
+      });
 
-    if (!error && onAvatarUpdated) {
-      onAvatarUpdated(data)
+      if (response.ok) {
+        const updatedProfile = await response.json();
+        if (onAvatarUpdated) {
+          onAvatarUpdated(updatedProfile);
+        }
+      } else {
+        console.error('Failed to update avatar');
+      }
+    } catch (error) {
+      console.error('Error updating avatar:', error);
     }
   }
 

@@ -1,7 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useSession, useUser } from '@clerk/nextjs';
-import { createClient } from '@supabase/supabase-js';
 import { Avatar } from '@/components/Avatar';
 
 export default function Profile() {
@@ -12,49 +11,48 @@ export default function Profile() {
   const { user } = useUser();
   const { session } = useSession();
 
-  function createClerkSupabaseClient() {
-    return createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL,
-      process.env.NEXT_PUBLIC_SUPABASE_KEY,
-      {
-        async accessToken() {
-          return session?.getToken() ?? null;
-        },
-      },
-    );
-  }
-
-  const client = createClerkSupabaseClient();
-
   useEffect(() => {
     if (!user) return;
 
     async function initializeUserProfile() {
       setLoading(true);
 
-      const { data: existingProfile, error: fetchError } = await client
-        .from('profile')
-        .select()
-        .eq('user_id', user.id)
-        .single();
+      try {
+        // Use Prisma instead of Supabase
+        const response = await fetch('/api/profile', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
 
-      if (existingProfile) {
-        setUserProfile(existingProfile);
-        setLoading(false);
-      } else {
-        const { data: newProfile, error: createError } = await client
-          .from('profile')
-          .insert({
-            user_id: user.id,
-            avatar_url: null,
-          })
-          .select()
-          .single();
+        if (response.ok) {
+          const existingProfile = await response.json();
+          if (existingProfile) {
+            setUserProfile(existingProfile);
+          } else {
+            // Create new profile
+            const createResponse = await fetch('/api/profile', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                user_id: user.id,
+                avatar_url: null,
+              }),
+            });
 
-        if (!createError) {
-          setUserProfile(newProfile);
-          setShowAvatarCreator(true);
+            if (createResponse.ok) {
+              const newProfile = await createResponse.json();
+              setUserProfile(newProfile);
+              setShowAvatarCreator(true);
+            }
+          }
         }
+      } catch (error) {
+        console.error('Error initializing profile:', error);
+      } finally {
         setLoading(false);
       }
     }
@@ -62,7 +60,7 @@ export default function Profile() {
     initializeUserProfile();
   }, [user]);
 
-  const handleAvatarUpdated = (updatedProfile) => {
+  const handleAvatarUpdated = async (updatedProfile) => {
     setUserProfile(updatedProfile);
     setShowAvatarCreator(false);
   };
@@ -99,7 +97,6 @@ export default function Profile() {
             <Avatar
               userId={user.id}
               avatarUrl={userProfile?.avatar_url}
-              supabaseClient={client}
               onAvatarUpdated={handleAvatarUpdated}
             />
           </div>
