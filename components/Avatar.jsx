@@ -52,8 +52,7 @@ export function Avatar({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          user_id: userId,
-          avatar_url: newAvatarUrl,
+          avatarUrl: newAvatarUrl,
         }),
       });
 

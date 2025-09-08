@@ -5,6 +5,7 @@ import { Avatar } from '@/components/Avatar';
 
 export default function Profile() {
   const [userProfile, setUserProfile] = useState(null);
+  const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showAvatarCreator, setShowAvatarCreator] = useState(false);
 
@@ -27,9 +28,12 @@ export default function Profile() {
         });
 
         if (response.ok) {
-          const existingProfile = await response.json();
-          if (existingProfile) {
-            setUserProfile(existingProfile);
+          const data = await response.json();
+          if (data.user) {
+            setUserData(data.user);
+          }
+          if (data.profile) {
+            setUserProfile(data.profile);
           } else {
             // Create new profile
             const createResponse = await fetch('/api/profile', {
@@ -38,14 +42,16 @@ export default function Profile() {
                 'Content-Type': 'application/json',
               },
               body: JSON.stringify({
-                user_id: user.id,
-                avatar_url: null,
+                email: user.primaryEmailAddress?.emailAddress,
+                username: user.username || user.firstName || `user-${user.id.slice(-8)}`,
+                avatarUrl: null,
               }),
             });
 
             if (createResponse.ok) {
-              const newProfile = await createResponse.json();
-              setUserProfile(newProfile);
+              const newData = await createResponse.json();
+              setUserData(newData.user);
+              setUserProfile(newData.profile);
               setShowAvatarCreator(true);
             }
           }
@@ -83,9 +89,9 @@ export default function Profile() {
           <div className="bg-white rounded-lg p-6 max-w-4xl max-h-[90vh] overflow-auto w-full mx-4">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">
-                {userProfile?.avatar_url ? 'Edit Your Avatar' : 'Create Your Avatar'}
+                {userProfile?.avatarUrl ? 'Edit Your Avatar' : 'Create Your Avatar'}
               </h2>
-              {userProfile?.avatar_url && (
+              {userProfile?.avatarUrl && (
                 <button
                   onClick={() => setShowAvatarCreator(false)}
                   className="text-gray-500 hover:text-gray-700 text-xl"
@@ -96,7 +102,7 @@ export default function Profile() {
             </div>
             <Avatar
               userId={user.id}
-              avatarUrl={userProfile?.avatar_url}
+              avatarUrl={userProfile?.avatarUrl}
               onAvatarUpdated={handleAvatarUpdated}
             />
           </div>
@@ -113,9 +119,9 @@ export default function Profile() {
           <div className="text-center mb-6">
             <div className="relative inline-block">
               <div className="w-32 h-32 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4 overflow-hidden">
-                {userProfile?.avatar_url ? (
+                {userProfile?.avatarUrl ? (
                   <img
-                    src={userProfile.avatar_url}
+                    src={userProfile.avatarUrl}
                     alt="Your Avatar"
                     className="w-full h-full object-cover"
                     onError={(e) => {
@@ -137,7 +143,7 @@ export default function Profile() {
                 onClick={() => setShowAvatarCreator(true)}
                 className="bg-blue-500 text-white px-6 py-2 rounded-full hover:bg-blue-600 transition-colors shadow-lg"
               >
-                {userProfile?.avatar_url ? '✏️ Edit Avatar' : '🎨 Create Avatar'}
+                {userProfile?.avatarUrl ? '✏️ Edit Avatar' : '🎨 Create Avatar'}
               </button>
             </div>
           </div>
@@ -145,18 +151,18 @@ export default function Profile() {
           <div className="space-y-3">
             <div className="bg-gray-50 p-4 rounded-lg">
               <p className="text-sm text-gray-600 mb-1">Username</p>
-              <p className="font-semibold">{user?.username || user?.firstName || 'Not set'}</p>
+              <p className="font-semibold">{userData?.username || user?.username || user?.firstName || 'Not set'}</p>
             </div>
 
             <div className="bg-gray-50 p-4 rounded-lg">
               <p className="text-sm text-gray-600 mb-1">Email</p>
-              <p className="font-semibold">{user?.primaryEmailAddress?.emailAddress}</p>
+              <p className="font-semibold">{userData?.email || user?.primaryEmailAddress?.emailAddress}</p>
             </div>
 
             <div className="bg-gray-50 p-4 rounded-lg">
               <p className="text-sm text-gray-600 mb-1">Avatar Status</p>
               <p className="font-semibold">
-                {userProfile?.avatar_url ? (
+                {userProfile?.avatarUrl ? (
                   <span className="text-green-600">✅ Avatar Ready</span>
                 ) : (
                   <span className="text-orange-600">⚠️ No Avatar</span>
@@ -164,11 +170,11 @@ export default function Profile() {
               </p>
             </div>
 
-            {userProfile?.created_at && (
+            {userData?.createdAt && (
               <div className="bg-gray-50 p-4 rounded-lg">
                 <p className="text-sm text-gray-600 mb-1">Member Since</p>
                 <p className="font-semibold">
-                  {new Date(userProfile.created_at).toLocaleDateString()}
+                  {new Date(userData.createdAt).toLocaleDateString()}
                 </p>
               </div>
             )}

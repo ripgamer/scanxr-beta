@@ -1,31 +1,15 @@
 // hooks/useUserProfile.js
 import { useEffect, useState } from 'react'
 import { useSession, useUser } from '@clerk/nextjs'
-import { createClient } from '@supabase/supabase-js'
 
 export function useUserProfile() {
   const [userProfile, setUserProfile] = useState(null)
+  const [userData, setUserData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   
   const { user } = useUser()
   const { session } = useSession()
-
-  // Create Supabase client with Clerk auth
-  function createClerkSupabaseClient() {
-    return createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL,
-      process.env.NEXT_PUBLIC_SUPABASE_KEY,
-      {
-        global: {
-          accessToken: async () => {
-            const token = await session?.getToken({ template: 'supabase' })
-            return token || null
-          },
-        },
-      }
-    )
-  }
   
 
   // Load or create user profile on login
@@ -40,34 +24,45 @@ export function useUserProfile() {
       setError(null)
       
       try {
-        const client = createClerkSupabaseClient()
-        
         // Check if user already has a profile
-        const { data: existingProfile, error: fetchError } = await client
-          .from('profile')
-          .select('*')
-          .eq('user_id', user.id)
-          .single()
+        const response = await fetch('/api/profile', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
 
-        if (existingProfile && !fetchError) {
-          // User has profile, load it
-          setUserProfile(existingProfile)
-        } else {
-          // New user, create profile without avatar_url
-          const { data: newProfile, error: createError } = await client
-            .from('profile')
-            .insert({
-              user_id: user.id,
-              avatar_url: null,
-            })
-            .select('*')
-            .single()
-
-          if (createError) {
-            throw createError
+        if (response.ok) {
+          const data = await response.json()
+          if (data.user) {
+            setUserData(data.user)
           }
-          
-          setUserProfile(newProfile)
+          if (data.profile) {
+            setUserProfile(data.profile)
+          } else {
+            // New user, create profile
+            const createResponse = await fetch('/api/profile', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                email: user.primaryEmailAddress?.emailAddress,
+                username: user.username || user.firstName || `user-${user.id.slice(-8)}`,
+                avatarUrl: null,
+              }),
+            })
+
+            if (createResponse.ok) {
+              const newData = await createResponse.json()
+              setUserData(newData.user)
+              setUserProfile(newData.profile)
+            } else {
+              throw new Error('Failed to create profile')
+            }
+          }
+        } else {
+          throw new Error('Failed to fetch profile')
         }
       } catch (err) {
         console.error('Error initializing user profile:', err)
@@ -84,20 +79,23 @@ export function useUserProfile() {
     if (!userProfile) return false
     
     try {
-      const client = createClerkSupabaseClient()
-      const { data: updatedProfile, error } = await client
-        .from('profile')
-        .update({ avatar_url: avatarUrl })
-        .eq('user_id', user.id)
-        .select('*')
-        .single()
+      const response = await fetch('/api/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          avatarUrl: avatarUrl,
+        }),
+      })
       
-      if (error) {
-        throw error
+      if (response.ok) {
+        const updatedProfile = await response.json()
+        setUserProfile(updatedProfile)
+        return true
+      } else {
+        throw new Error('Failed to update avatar')
       }
-      
-      setUserProfile(updatedProfile)
-      return true
     } catch (err) {
       console.error('Error updating avatar:', err)
       setError(err.message)
@@ -107,6 +105,7 @@ export function useUserProfile() {
 
   return {
     user,
+    userData,
     userProfile,
     loading,
     error,
