@@ -95,6 +95,8 @@ model Follow {
 
 
 
+
+
 // Your existing models (keeping them as-is)
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 // model profile {
