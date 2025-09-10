@@ -1,81 +1,67 @@
 import { Webhook } from "svix";
 import { headers } from "next/headers";
-import prisma from "@/lib/prisma";
+import { NextResponse } from "next/server";
+import prisma from "@/lib/prisma"; // make sure you have prisma client setup
+
+const webhookSecret = process.env.CLERK_WEBHOOK_SECRET;
 
 export async function POST(req) {
-  // Step 1: Verify Clerk Webhook Signature
-  const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET;
-  if (!WEBHOOK_SECRET) {
-    return new Response("Missing Clerk webhook secret", { status: 500 });
-  }
+  const payload = await req.json();
+  const heads = headers();
 
-  const svix_id = headers().get("svix-id");
-  const svix_timestamp = headers().get("svix-timestamp");
-  const svix_signature = headers().get("svix-signature");
+  const svix_id = heads.get("svix-id");
+  const svix_timestamp = heads.get("svix-timestamp");
+  const svix_signature = heads.get("svix-signature");
 
   if (!svix_id || !svix_timestamp || !svix_signature) {
-    return new Response("Missing Svix headers", { status: 400 });
+    return new Response("Missing svix headers", { status: 400 });
   }
 
-  const payload = await req.json();
-  const body = JSON.stringify(payload);
-
-  const wh = new Webhook(WEBHOOK_SECRET);
+  const wh = new Webhook(webhookSecret);
 
   let evt;
   try {
-    evt = wh.verify(body, {
+    evt = wh.verify(JSON.stringify(payload), {
       "svix-id": svix_id,
       "svix-timestamp": svix_timestamp,
       "svix-signature": svix_signature,
     });
   } catch (err) {
-    console.error("Webhook signature verification failed", err);
+    console.error("Webhook verification failed:", err);
     return new Response("Invalid signature", { status: 400 });
   }
 
-  // Step 2: Handle Clerk Events
   const eventType = evt.type;
-  const data = evt.data;
 
-  if (eventType === "user.created" || eventType === "user.updated") {
-    const email = data.email_addresses?.[0]?.email_address || null;
-    const username = data.username || data.id;
-    const imageUrl = data.image_url || null;
-    const fullName = data.first_name
-      ? `${data.first_name} ${data.last_name || ""}`.trim()
-      : null;
+  // Handle user.created event
+  if (eventType === "user.created") {
+    const userData = evt.data;
 
-    // Step 3: Upsert User & Profile
     try {
-      const user = await prisma.user.upsert({
-        where: { id: data.id },
-        update: {
-          email,
-          username,
-          updatedAt: new Date(),
+      // 1. Create user in the database
+      const user = await prisma.user.create({
+        data: {
+          id: userData.id,
+          email: userData.email_addresses[0].email_address,
+          username: userData.username || userData.id,
         },
-        create: {
-          id: data.id,
-          email,
-          username,
-          profile: {
-            create: {
-              slug: username,
-              avatarUrl: imageUrl,
-              bio: fullName || `Hello, I'm ${username}`,
-            },
-          },
-        },
-        include: { profile: true },
       });
 
-      console.log("User synced:", user);
+      // 2. Create profile linked to user
+      await prisma.profile.create({
+        data: {
+          userId: user.id,
+          slug: userData.username || userData.id,
+          bio: userData.public_metadata?.bio || null,
+          avatarUrl: userData.profile_image_url || null,
+        },
+      });
+
+      console.log("User + Profile created successfully!");
     } catch (err) {
-      console.error("Error syncing user:", err);
-      return new Response("DB error", { status: 500 });
+      console.error("Database error:", err);
     }
   }
 
-  return new Response("Webhook received", { status: 200 });
+  return NextResponse.json({ status: "success" });
 }
