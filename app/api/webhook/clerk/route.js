@@ -70,7 +70,23 @@ export async function POST(req) {
         },
       });
     } else if (eventType === "user.deleted") {
-      await prisma.user.delete({ where: { id: data.id } });
+      // Delete dependent records first to satisfy foreign key constraints
+      try {
+        await prisma.profile.delete({ where: { userId: data.id } });
+      } catch (err) {
+        // Ignore if profile doesn't exist
+        if (err?.code !== 'P2025') {
+          throw err;
+        }
+      }
+      try {
+        await prisma.user.delete({ where: { id: data.id } });
+      } catch (err) {
+        // Ignore if user already not found
+        if (err?.code !== 'P2025') {
+          throw err;
+        }
+      }
     }
   } catch (err) {
     console.error("Database operation failed:", err?.message || err);
