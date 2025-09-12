@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic";
 import { prisma } from "@/lib/prisma";
 
 export default async function ProfileBySlug({ params }) {
-  const { slug } = params || {};
+  const { slug } = await params;
 
   // Fetch profile using slug
   const profile = await prisma.profile.findUnique({
