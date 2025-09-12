@@ -37,10 +37,11 @@ model Profile {
   updatedAt      DateTime @updatedAt
 
   // Relations
-  user           User     @relation(fields: [userId], references: [id])
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([slug])
 }
+
 
 model Post {
   id           String   @id @default(cuid())
@@ -89,6 +90,8 @@ model Follow {
   @@index([followerId])
   @@index([followingId])
 }
+
+
 
 
 

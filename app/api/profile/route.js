@@ -153,11 +153,11 @@ export async function PUT(request) {
     }
 
     const body = await request.json();
-    const { avatar_url } = body;
+    const { avatarUrl } = body;
 
     // Check if profile exists first
     const existingProfile = await prisma.profile.findUnique({
-      where: { user_id: userId },
+      where: { userId: userId },
     });
 
     if (!existingProfile) {
@@ -166,10 +166,10 @@ export async function PUT(request) {
 
     const profile = await prisma.profile.update({
       where: {
-        user_id: userId,
+        userId: userId,
       },
       data: {
-        avatar_url,
+        avatarUrl,
       },
     });
 
@@ -183,4 +183,5 @@ export async function PUT(request) {
     
     return NextResponse.json({ error: 'Failed to update profile' }, { status: 500 });
   }
+  
 } 
