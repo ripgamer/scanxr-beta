@@ -5,6 +5,7 @@ import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { FaUpload, FaCamera, FaCube, FaArrowRight, FaCheck, FaImage } from 'react-icons/fa';
+import { uploadFileWithProgress, validate3DModel, validateThumbnail } from '@/lib/supabase-client';
 
 export default function CreatePage() {
   const { user, isSignedIn } = useUser();
@@ -111,55 +112,89 @@ export default function CreatePage() {
     setError('');
     setUploadProgress(0);
     
+    let modelUrl = null;
+    let thumbnailUrl = null;
+    
     try {
-      // Basic validation (detailed validation happens on server)
+      // Validate files
       if (!formData.file || !formData.title.trim()) {
         throw new Error('Please provide both a title and a 3D model file.');
       }
 
-      // Create FormData for file upload
-      const uploadFormData = new FormData();
-      uploadFormData.append('title', formData.title);
-      uploadFormData.append('description', formData.description);
-      uploadFormData.append('tags', formData.tags.join(','));
-      uploadFormData.append('visibility', formData.visibility);
-      uploadFormData.append('modelFile', formData.file);
-      
+      validate3DModel(formData.file);
       if (formData.thumbnailFile) {
-        uploadFormData.append('thumbnailFile', formData.thumbnailFile);
+        validateThumbnail(formData.thumbnailFile);
       }
 
-      // Start upload with progress simulation
-      // In a real implementation, you'd get progress from the upload
-      const progressInterval = setInterval(() => {
-        setUploadProgress(prev => {
-          if (prev >= 90) {
-            clearInterval(progressInterval);
-            return 90;
-          }
-          return prev + Math.random() * 15;
-        });
-      }, 500);
+      // Step 1: Upload 3D model directly to Supabase (0-70%)
+      setUploadProgress(5);
+      const modelResult = await uploadFileWithProgress(
+        formData.file,
+        user.id,
+        'models',
+        (progress) => {
+          // Map 0-100% progress to 5-70% range
+          const adjustedProgress = 5 + (progress * 0.65);
+          setUploadProgress(Math.round(adjustedProgress));
+        }
+      );
+      modelUrl = modelResult.url;
 
+      // Step 2: Upload thumbnail if provided (70-85%)
+      if (formData.thumbnailFile) {
+        setUploadProgress(70);
+        const thumbnailResult = await uploadFileWithProgress(
+          formData.thumbnailFile,
+          user.id,
+          'thumbnails',
+          (progress) => {
+            // Map 0-100% progress to 70-85% range
+            const adjustedProgress = 70 + (progress * 0.15);
+            setUploadProgress(Math.round(adjustedProgress));
+          }
+        );
+        thumbnailUrl = thumbnailResult.url;
+      } else {
+        setUploadProgress(85);
+      }
+
+      // Step 3: Create post record in database (85-95%)
+      setUploadProgress(85);
       const response = await fetch('/api/posts', {
         method: 'POST',
-        body: uploadFormData,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: formData.title,
+          description: formData.description,
+          tags: formData.tags.join(','),
+          visibility: formData.visibility,
+          modelUrl,
+          thumbnailUrl,
+        }),
       });
 
-      clearInterval(progressInterval);
-      setUploadProgress(95);
+      setUploadProgress(90);
 
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || 'Upload failed');
+        throw new Error(result.error || 'Failed to create post');
       }
 
       setUploadProgress(100);
 
-      // Success! Show completion message briefly then redirect to profile
+      // Success! Show completion message briefly then redirect to user's profile
       setTimeout(() => {
-        router.push('/profile');
+        // Redirect to dynamic profile using username or fallback to /profile
+        const username = user?.username || user?.unsafeMetadata?.username;
+        if (username) {
+          router.push(`/${username}`);
+        } else {
+          // Fallback to /profile which will redirect to correct slug
+          router.push('/profile');
+        }
       }, 1000);
       
     } catch (error) {
