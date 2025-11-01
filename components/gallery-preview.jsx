@@ -3,7 +3,6 @@
 import { Button } from "@/components/ui/button"
 import { ArrowRight, Grid3X3 } from "lucide-react"
 import { useEffect, useState } from 'react'
-import PostModal from './PostModal'
 
 // Sample posts data with hardcoded content
 const samplePosts = [
@@ -207,17 +206,9 @@ const ModelViewerThumbnail = ({ gltfUrl, alt = '3D model', index, onClick }) => 
 };
 
 export function GalleryPreview({ posts = [], userId }) {
-  const [selectedPost, setSelectedPost] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
   const handlePostClick = (post) => {
-    setSelectedPost(post);
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setSelectedPost(null);
+    // Navigate to post page with unique slug
+    window.location.href = `/p/${post.slug}`;
   };
 
   // Show message if no posts
@@ -273,12 +264,6 @@ export function GalleryPreview({ posts = [], userId }) {
           ))}
         </div>
       </div>
-
-      <PostModal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        post={selectedPost}
-      />
     </>
   )
 }

@@ -157,10 +157,10 @@ export default function CreatePage() {
 
       setUploadProgress(100);
 
-      // Success! Show completion message briefly then redirect
+      // Success! Show completion message briefly then redirect to profile
       setTimeout(() => {
-        router.push(`/profile?uploaded=true&postId=${result.post.id}`);
-      }, 1500);
+        router.push('/profile');
+      }, 1000);
       
     } catch (error) {
       console.error('Upload failed:', error);
@@ -419,7 +419,14 @@ export default function CreatePage() {
                       style={{ width: `${uploadProgress}%` }}
                     ></div>
                   </div>
-                  <p className="text-sm text-gray-600">Uploading... {uploadProgress}%</p>
+                  {uploadProgress === 100 ? (
+                    <p className="text-sm text-green-600 dark:text-green-400 font-medium flex items-center gap-2">
+                      <FaCheck className="w-4 h-4" />
+                      Upload complete! Redirecting to your profile...
+                    </p>
+                  ) : (
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Uploading... {Math.round(uploadProgress)}%</p>
+                  )}
                 </div>
               )}
 
