@@ -10,7 +10,27 @@ export default async function ProfileBySlug({ params }) {
   // Fetch profile using slug
   const profile = await prisma.profile.findUnique({
     where: { slug: slug }, // ✅ Using slug from Profile model
-    include: { user: true }, // To get related user data
+    include: { 
+      user: {
+        include: {
+          posts: {
+            where: {
+              visibility: 'public' // Only show public posts
+            },
+            orderBy: {
+              createdAt: 'desc' // Newest first
+            },
+            include: {
+              postTags: {
+                include: {
+                  tag: true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
   });
 
   if (!profile) {
@@ -21,11 +41,14 @@ export default async function ProfileBySlug({ params }) {
     );
   }
 
+  // Extract posts from the user
+  const posts = profile.user.posts || [];
+
   return (
     <div className="min-h-screen mt-16 sm:mt-20 md:mt-28 flex items-center justify-center">
       <div className="w-full max-w-4xl px-4 sm:px-6 space-y-4 sm:space-y-6">
         <ProfileHero profile={profile} />
-        <GalleryPreview />
+        <GalleryPreview posts={posts} userId={profile.userId} />
       </div>
     </div>
   );
