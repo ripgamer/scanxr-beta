@@ -15,14 +15,27 @@ function generateSlug(title) {
     .trim('-');
 }
 
-// Generate unique slug by checking database
+// Generate random short ID (like Instagram)
+function generateShortId(length = 8) {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  for (let i = 0; i < length; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+}
+
+// Generate unique slug with random ID
 async function generateUniqueSlug(baseTitle, userId) {
-  let slug = generateSlug(baseTitle);
-  let counter = 1;
+  // Create base slug from title (limit to 50 chars)
+  const baseSlug = generateSlug(baseTitle).substring(0, 50);
   
+  // Add random short ID to make it unique (like Instagram's format)
+  let slug = `${baseSlug}-${generateShortId(8)}`;
+  
+  // Ensure uniqueness (very unlikely to collide, but just in case)
   while (await prisma.post.findUnique({ where: { slug } })) {
-    slug = `${generateSlug(baseTitle)}-${counter}`;
-    counter++;
+    slug = `${baseSlug}-${generateShortId(8)}`;
   }
   
   return slug;

@@ -3,7 +3,6 @@
 import { Button } from "@/components/ui/button"
 import { ArrowRight, Grid3X3 } from "lucide-react"
 import { useEffect, useState } from 'react'
-import PostModal from './PostModal'
 
 // Sample posts data with hardcoded content
 const samplePosts = [
@@ -206,19 +205,34 @@ const ModelViewerThumbnail = ({ gltfUrl, alt = '3D model', index, onClick }) => 
   );
 };
 
-export function GalleryPreview() {
-  const [selectedPost, setSelectedPost] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
+export function GalleryPreview({ posts = [], userId }) {
   const handlePostClick = (post) => {
-    setSelectedPost(post);
-    setIsModalOpen(true);
+    // Navigate to post page with unique slug
+    window.location.href = `/p/${post.slug}`;
   };
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setSelectedPost(null);
-  };
+  // Show message if no posts
+  if (!posts || posts.length === 0) {
+    return (
+      <div className="bg-card border border-border rounded-xl p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Grid3X3 className="w-5 h-5 text-primary" />
+            <h3 className="text-lg font-semibold text-foreground">Posts</h3>
+          </div>
+        </div>
+        <div className="flex flex-col items-center justify-center py-12 text-center">
+          <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
+            <Grid3X3 className="w-8 h-8 text-muted-foreground" />
+          </div>
+          <h3 className="text-lg font-semibold mb-2">No posts yet</h3>
+          <p className="text-sm text-muted-foreground">
+            This user hasn't shared any 3D models yet.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -227,15 +241,18 @@ export function GalleryPreview() {
           <div className="flex items-center gap-2">
             <Grid3X3 className="w-5 h-5 text-primary" />
             <h3 className="text-lg font-semibold text-foreground">Posts</h3>
+            <span className="text-sm text-muted-foreground">({posts.length})</span>
           </div>
-          <Button variant="ghost" size="sm" className="text-primary hover:text-primary/80">
-            View All
-            <ArrowRight className="w-4 h-4 ml-1" />
-          </Button>
+          {posts.length > 9 && (
+            <Button variant="ghost" size="sm" className="text-primary hover:text-primary/80">
+              View All
+              <ArrowRight className="w-4 h-4 ml-1" />
+            </Button>
+          )}
         </div>
 
         <div className="grid grid-cols-3 gap-2">
-          {samplePosts.map((post, index) => (
+          {posts.slice(0, 9).map((post, index) => (
             <div key={post.id} className="aspect-square rounded-lg overflow-hidden bg-muted group">
               <ModelViewerThumbnail
                 gltfUrl={post.modelUrl}
@@ -247,12 +264,6 @@ export function GalleryPreview() {
           ))}
         </div>
       </div>
-
-      <PostModal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        post={selectedPost}
-      />
     </>
   )
 }
