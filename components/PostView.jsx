@@ -58,26 +58,33 @@ export default function PostView({ post }) {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Mobile Header */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur border-b border-border">
-        <div className="flex items-center justify-between p-4">
-          <Button variant="ghost" size="icon" onClick={() => router.back()}>
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <h1 className="font-semibold text-lg">Post</h1>
-          <Button variant="ghost" size="icon">
-            <MoreHorizontal className="w-5 h-5" />
-          </Button>
-        </div>
+    <div className="min-h-screen bg-background pt-16 pb-20 sm:pt-20 sm:pb-24 md:pt-24 md:pb-8 lg:pt-24 lg:pb-8">
+      {/* Mobile Back Button - Top Left */}
+      <div className="lg:hidden fixed top-16 left-2 z-50 sm:top-20 sm:left-4">
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={() => router.back()} 
+          className="bg-background/80 backdrop-blur-sm border border-border shadow-lg hover:bg-background/90"
+        >
+          <ArrowLeft className="w-5 h-5" />
+        </Button>
+      </div>
+
+      {/* Desktop Back Button */}
+      <div className="hidden lg:block max-w-6xl mx-auto px-4 mb-4">
+        <Button variant="ghost" size="sm" onClick={() => router.back()} className="gap-2">
+          <ArrowLeft className="w-4 h-4" />
+          Back
+        </Button>
       </div>
 
       {/* Main Content */}
-      <div className="max-w-6xl mx-auto pt-16 lg:pt-8 pb-8">
-        <div className="flex flex-col lg:flex-row gap-0 lg:gap-8 bg-card lg:rounded-lg overflow-hidden lg:border border-border min-h-[calc(100vh-8rem)]">
+      <div className="max-w-6xl mx-auto px-2 sm:px-4 md:px-6">
+        <div className="flex flex-col lg:flex-row gap-0 lg:gap-6 bg-card rounded-lg overflow-hidden border border-border shadow-lg">
           
           {/* Left: 3D Model Viewer */}
-          <div className="flex-1 bg-black flex items-center justify-center relative lg:rounded-l-lg">
+          <div className="flex-1 bg-black flex items-center justify-center relative lg:rounded-l-lg h-[45vh] sm:h-[50vh] lg:h-[calc(100vh-12rem)]">
             {isModelViewerLoaded ? (
               <model-viewer
                 src={post.modelUrl}
@@ -92,7 +99,6 @@ export default function PostView({ post }) {
                 style={{
                   width: "100%",
                   height: "100%",
-                  minHeight: "60vh",
                   "--poster-color": "transparent",
                 }}
               >
@@ -108,46 +114,46 @@ export default function PostView({ post }) {
                 </style>
               </model-viewer>
             ) : (
-              <div className="flex items-center justify-center h-[60vh]">
+              <div className="flex items-center justify-center h-full">
                 <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
               </div>
             )}
           </div>
 
           {/* Right: Post Details */}
-          <div className="w-full lg:w-96 flex flex-col bg-card">
+          <div className="w-full lg:w-96 flex flex-col bg-card max-h-[50vh] sm:max-h-[45vh] lg:max-h-[calc(100vh-12rem)]">
             {/* User Info */}
-            <div className="p-4 border-b border-border">
+            <div className="p-3 sm:p-4 border-b border-border">
               <div className="flex items-center justify-between">
                 <Link 
                   href={`/${post.user.profile?.slug || post.user.username}`}
-                  className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+                  className="flex items-center gap-2 sm:gap-3 hover:opacity-80 transition-opacity"
                 >
-                  <Avatar className="w-10 h-10">
+                  <Avatar className="w-8 h-8 sm:w-10 sm:h-10">
                     <img 
                       src={post.user.profile?.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${post.user.username}`} 
                       alt={post.user.username}
                     />
                   </Avatar>
                   <div>
-                    <p className="font-semibold text-sm">{post.user.username}</p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="font-semibold text-xs sm:text-sm">{post.user.username}</p>
+                    <p className="text-[10px] sm:text-xs text-muted-foreground">
                       {new Date(post.createdAt).toLocaleDateString()}
                     </p>
                   </div>
                 </Link>
-                <Button variant="ghost" size="icon">
-                  <MoreHorizontal className="w-5 h-5" />
+                <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-10 sm:w-10">
+                  <MoreHorizontal className="w-4 h-4 sm:w-5 sm:h-5" />
                 </Button>
               </div>
             </div>
 
-            {/* Post Caption & Details */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            {/* Post Caption & Details - Scrollable */}
+            <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-2 sm:space-y-3 custom-scrollbar">
               <div>
-                <h1 className="text-xl font-bold mb-2">{post.title}</h1>
+                <h1 className="text-base sm:text-lg lg:text-xl font-bold mb-1 sm:mb-2">{post.title}</h1>
                 {post.caption && (
-                  <p className="text-sm text-foreground whitespace-pre-wrap">
+                  <p className="text-xs sm:text-sm text-foreground/90 whitespace-pre-wrap line-clamp-4 sm:line-clamp-6 lg:line-clamp-none">
                     {post.caption}
                   </p>
                 )}
@@ -155,11 +161,11 @@ export default function PostView({ post }) {
 
               {/* Tags */}
               {post.postTags && post.postTags.length > 0 && (
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1.5 sm:gap-2">
                   {post.postTags.map((postTag) => (
                     <span
                       key={postTag.id}
-                      className="text-xs bg-primary/10 text-primary px-3 py-1 rounded-full"
+                      className="text-[10px] sm:text-xs bg-primary/10 text-primary px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full"
                     >
                       #{postTag.tag.name}
                     </span>
@@ -168,38 +174,53 @@ export default function PostView({ post }) {
               )}
 
               {/* Timestamp */}
-              <p className="text-xs text-muted-foreground">
+              <p className="text-[10px] sm:text-xs text-muted-foreground">
                 {new Date(post.createdAt).toLocaleString()}
               </p>
             </div>
 
-            {/* Actions Bar */}
-            <div className="border-t border-border p-4 space-y-4">
+            <style jsx>{`
+              .custom-scrollbar::-webkit-scrollbar {
+                width: 6px;
+              }
+              .custom-scrollbar::-webkit-scrollbar-track {
+                background: transparent;
+              }
+              .custom-scrollbar::-webkit-scrollbar-thumb {
+                background: hsl(var(--muted-foreground) / 0.3);
+                border-radius: 3px;
+              }
+              .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                background: hsl(var(--muted-foreground) / 0.5);
+              }
+            `}</style>
+
+            {/* Actions Bar - Compact */}
+            <div className="border-t border-border p-2 sm:p-3 lg:p-4 space-y-2 sm:space-y-3">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 sm:gap-3">
                   <Button
                     variant="ghost"
-                    size="icon"
+                    size="sm"
                     onClick={handleLike}
-                    className={isLiked ? "text-red-500" : ""}
+                    className={`p-1.5 sm:p-2 h-8 w-8 sm:h-10 sm:w-10 ${isLiked ? "text-red-500" : ""}`}
                   >
-                    <Heart className={`w-6 h-6 ${isLiked ? "fill-current" : ""}`} />
+                    <Heart className={`w-4 h-4 sm:w-5 sm:h-5 ${isLiked ? "fill-current" : ""}`} />
                   </Button>
-                  <Button variant="ghost" size="icon">
-                    <MessageCircle className="w-6 h-6" />
+                  <Button variant="ghost" size="sm" className="p-1.5 sm:p-2 h-8 w-8 sm:h-10 sm:w-10">
+                    <MessageCircle className="w-4 h-4 sm:w-5 sm:h-5" />
                   </Button>
-                  <Button variant="ghost" size="icon" onClick={handleShare}>
-                    <Share2 className="w-6 h-6" />
+                  <Button variant="ghost" size="sm" onClick={handleShare} className="p-1.5 sm:p-2 h-8 w-8 sm:h-10 sm:w-10">
+                    <Share2 className="w-4 h-4 sm:w-5 sm:h-5" />
                   </Button>
+                </div>
+                <div className="text-sm">
+                  <p className="font-semibold text-[10px] sm:text-xs lg:text-sm">{likes} likes</p>
                 </div>
               </div>
 
-              <div className="text-sm">
-                <p className="font-semibold">{likes} likes</p>
-              </div>
-
               {/* View in AR Button */}
-              <Button className="w-full" variant="default">
+              <Button className="w-full text-xs sm:text-sm" variant="default" size="sm">
                 View in AR
               </Button>
             </div>

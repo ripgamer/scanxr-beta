@@ -52,19 +52,64 @@ export async function POST(request) {
       );
     }
 
-    // Parse the form data
-    const formData = await request.formData();
-    const title = formData.get('title');
-    const description = formData.get('description');
-    const tags = formData.get('tags');
-    const visibility = formData.get('visibility');
-    const modelFile = formData.get('modelFile');
-    const thumbnailFile = formData.get('thumbnailFile');
+    // Check content type to handle both JSON and FormData
+    const contentType = request.headers.get('content-type');
+    let title, description, tags, visibility, modelUrl, thumbnailUrl, modelFile, thumbnailFile;
+
+    if (contentType?.includes('application/json')) {
+      // New flow: Direct upload with pre-uploaded URLs
+      const body = await request.json();
+      title = body.title;
+      description = body.description;
+      tags = body.tags;
+      visibility = body.visibility;
+      modelUrl = body.modelUrl;
+      thumbnailUrl = body.thumbnailUrl || '/api/placeholder';
+    } else {
+      // Legacy flow: File upload through API
+      const formData = await request.formData();
+      title = formData.get('title');
+      description = formData.get('description');
+      tags = formData.get('tags');
+      visibility = formData.get('visibility');
+      modelFile = formData.get('modelFile');
+      thumbnailFile = formData.get('thumbnailFile');
+
+      // Validate required fields for legacy flow
+      if (!modelFile) {
+        return NextResponse.json(
+          { error: 'Model file is required' },
+          { status: 400 }
+        );
+      }
+
+      // Ensure user exists in our database
+      const dbUser = await ensureUserExists(user);
+
+      // Upload files to Supabase with validation
+      try {
+        // Upload 3D model
+        modelUrl = await upload3DModel(modelFile, dbUser.id);
+
+        // Upload thumbnail if provided
+        if (thumbnailFile) {
+          thumbnailUrl = await uploadThumbnail(thumbnailFile, dbUser.id);
+        } else {
+          thumbnailUrl = '/api/placeholder';
+        }
+      } catch (uploadError) {
+        console.error('File upload error:', uploadError);
+        return NextResponse.json(
+          { error: `Upload failed: ${uploadError.message}` },
+          { status: 400 }
+        );
+      }
+    }
 
     // Validate required fields
-    if (!title || !modelFile) {
+    if (!title || !modelUrl) {
       return NextResponse.json(
-        { error: 'Title and model file are required' },
+        { error: 'Title and model URL are required' },
         { status: 400 }
       );
     }
@@ -74,28 +119,6 @@ export async function POST(request) {
 
     // Generate unique slug
     const slug = await generateUniqueSlug(title, dbUser.id);
-
-    // Upload files to Firebase with validation
-    let modelUrl, thumbnailUrl;
-
-    try {
-      // Upload 3D model
-      modelUrl = await upload3DModel(modelFile, dbUser.id);
-
-      // Upload thumbnail if provided
-      if (thumbnailFile) {
-        thumbnailUrl = await uploadThumbnail(thumbnailFile, dbUser.id);
-      } else {
-        // Use placeholder for thumbnail
-        thumbnailUrl = '/api/placeholder';
-      }
-    } catch (uploadError) {
-      console.error('File upload error:', uploadError);
-      return NextResponse.json(
-        { error: `Upload failed: ${uploadError.message}` },
-        { status: 400 }
-      );
-    }
 
     // Process tags
     const tagsList = tags ? tags.split(',').filter(tag => tag.trim()) : [];
@@ -148,7 +171,12 @@ export async function POST(request) {
         user: {
           select: {
             username: true,
-            email: true
+            email: true,
+            profile: {
+              select: {
+                slug: true
+              }
+            }
           }
         },
         postTags: {
