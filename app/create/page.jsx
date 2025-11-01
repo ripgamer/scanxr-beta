@@ -187,10 +187,9 @@ export default function CreatePage() {
 
       // Success! Show completion message briefly then redirect to user's profile
       setTimeout(() => {
-        // Redirect to dynamic profile using username or fallback to /profile
-        const username = user?.username || user?.unsafeMetadata?.username;
-        if (username) {
-          router.push(`/${username}`);
+        // Redirect to dynamic profile using the profileSlug from API response
+        if (result.profileSlug) {
+          router.push(`/${result.profileSlug}`);
         } else {
           // Fallback to /profile which will redirect to correct slug
           router.push('/profile');

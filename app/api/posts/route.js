@@ -205,7 +205,9 @@ export async function POST(request) {
           color: pt.tag.color
         })),
         user: post.user
-      }
+      },
+      // Include profile slug for easy redirect
+      profileSlug: post.user?.profile?.slug || post.user?.username
     });
 
   } catch (error) {
