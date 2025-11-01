@@ -7,7 +7,6 @@ datasource db {
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
-
 model User {
   id        String    @id @default(cuid())
   email     String    @unique
@@ -51,6 +50,7 @@ model Post {
   modelUrl     String
   thumbnailUrl String
   slug         String   @unique
+  visibility   String   @default("public") // public, unlisted, private
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   likesCount   Int      @default(0)
@@ -58,9 +58,11 @@ model Post {
   // Relations
   user         User     @relation(fields: [userId], references: [id])
   likes        Like[]
+  postTags     PostTag[]
 
   @@index([userId])
   @@index([slug])
+  @@index([visibility])
 }
 
 model Like {
@@ -90,6 +92,40 @@ model Follow {
   @@index([followerId])
   @@index([followingId])
 }
+
+model Tag {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  slug        String    @unique
+  description String?
+  color       String?   @default("#6366f1") // Default purple color
+  postCount   Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  postTags    PostTag[]
+
+  @@index([name])
+  @@index([slug])
+}
+
+model PostTag {
+  id        String   @id @default(cuid())
+  postId    String
+  tagId     String
+  createdAt DateTime @default(now())
+
+  // Relations
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  tag       Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, tagId])
+  @@index([postId])
+  @@index([tagId])
+}
+
+
 
 
 
