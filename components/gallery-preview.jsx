@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button"
 import { ArrowRight, Grid3X3 } from "lucide-react"
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 
 // Sample posts data with hardcoded content
 const samplePosts = [
@@ -127,6 +127,8 @@ const ModelViewerThumbnail = ({ gltfUrl, alt = '3D model', index, onClick }) => 
     }
   }, [index]);
 
+  const mvRef = useRef(null);
+
   const handleLoad = () => {
     setIsLoaded(true);
   };
@@ -135,6 +137,22 @@ const ModelViewerThumbnail = ({ gltfUrl, alt = '3D model', index, onClick }) => 
     setHasError(true);
     setIsLoaded(true);
   };
+
+  // Attach native event listeners to the <model-viewer> element because
+  // React doesn't map custom element events like 'load' and 'error' to props reliably.
+  useEffect(() => {
+    if (!showModel) return;
+    const el = mvRef.current || document.querySelector(`#model-viewer-${index}`);
+    if (!el) return;
+
+    el.addEventListener('load', handleLoad);
+    el.addEventListener('error', handleError);
+
+    return () => {
+      el.removeEventListener('load', handleLoad);
+      el.removeEventListener('error', handleError);
+    };
+  }, [showModel, index]);
 
   return (
     <div 
@@ -160,6 +178,8 @@ const ModelViewerThumbnail = ({ gltfUrl, alt = '3D model', index, onClick }) => 
       
       {showModel && !hasError && (
         <model-viewer
+          id={`model-viewer-${index}`}
+          ref={mvRef}
           src={gltfUrl}
           alt={alt}
           camera-controls
@@ -173,8 +193,6 @@ const ModelViewerThumbnail = ({ gltfUrl, alt = '3D model', index, onClick }) => 
             height: '100%',
             '--poster-color': 'transparent'
           }}
-          onLoad={handleLoad}
-          onError={handleError}
         >
           <style>
             {`

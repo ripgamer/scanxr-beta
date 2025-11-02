@@ -160,3 +160,25 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Global spacing for main content to account for fixed header and bottom nav */
+@layer utilities {
+  .page-container {
+    @apply pt-20 pb-32 sm:pt-20 sm:pb-32 md:pt-24 md:pb-28 lg:pt-24 lg:pb-8;
+    min-height: 100vh;
+  }
+  
+  /* Ensure 3D models render properly on mobile */
+  model-viewer {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  
+  /* Fix for iOS Safari viewport height issues */
+  @supports (-webkit-touch-callout: none) {
+    .page-container {
+      min-height: -webkit-fill-available;
+    }
+  }
+}

@@ -45,7 +45,7 @@ export default async function ProfileBySlug({ params }) {
   const posts = profile.user.posts || [];
 
   return (
-    <div className="min-h-screen mt-16 sm:mt-20 md:mt-28 flex items-center justify-center">
+    <div className="min-h-screen pt-20 pb-32 sm:pt-20 sm:pb-32 md:pt-24 md:pb-28 lg:pt-24 lg:pb-8 flex items-center justify-center">
       <div className="w-full max-w-4xl px-4 sm:px-6 space-y-4 sm:space-y-6">
         <ProfileHero profile={profile} />
         <GalleryPreview posts={posts} userId={profile.userId} />
