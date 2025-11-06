@@ -3,7 +3,7 @@
 import React from 'react';
 import { useEffect } from 'react';
 
-const ModelViewer = ({ gltfUrl, usdzUrl, alt = '3D model' }) => {
+const ModelViewer = ({ src, poster, alt = '3D model', className = '' }) => {
 
     useEffect(() => {
         const id = 'model-viewer-cdn';
@@ -19,19 +19,19 @@ const ModelViewer = ({ gltfUrl, usdzUrl, alt = '3D model' }) => {
       }, []);
 
   return (
-    <div className="w-full max-w-xl mx-auto">
-      <model-viewer
-        src={gltfUrl}
-        {...(usdzUrl ? { 'ios-src': usdzUrl } : {})}
-        alt={alt}
-        ar
-        ar-modes="scene-viewer quick-look webxr"
-        camera-controls
-        auto-rotate
-        environment-image="neutral"
-        style={{ width: '100%', height: '500px' }}
-      ></model-viewer>
-    </div>
+    <model-viewer
+      src={src}
+      poster={poster}
+      alt={alt}
+      camera-controls
+      auto-rotate
+      auto-rotate-delay="0"
+      rotation-per-second="30deg"
+      environment-image="neutral"
+      shadow-intensity="1"
+      className={className}
+      style={{ width: '100%', height: '100%', minHeight: '300px' }}
+    ></model-viewer>
   );
 };
 

@@ -4,65 +4,74 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Masonry from 'react-masonry-css';
 import { useRouter } from 'next/navigation';
-import { FaQrcode, FaVrCardboard } from 'react-icons/fa';
+import { FaQrcode, FaVrCardboard, FaHeart } from 'react-icons/fa';
 import ImageModal from '@/components/ui/ImageModal';
+import dynamic from 'next/dynamic';
+
+// Dynamically import model-viewer to avoid SSR issues
+const ModelViewer = dynamic(() => import('@/components/ModelViewer'), { 
+  ssr: false,
+  loading: () => <div className="w-full h-full bg-gray-200 animate-pulse" />
+});
 
 export default function ExplorePage() {
   const router = useRouter();
   const [hovered, setHovered] = useState(null);
-  const [images, setImages] = useState([]);
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState({ open: false, glbUrl: '', title: '' });
 
-  // 🔹 Dummy Data (for now)
+  // Fetch posts from database
   useEffect(() => {
-    // In future, replace this with fetch from backend:
-    /*
-    fetch('/api/posts')
-      .then(res => res.json())
-      .then(data => setImages(data))
-      .catch(err => console.error(err));
-    */
-    setImages([
-      {
-        id: 1,
-        title: 'Cool 3D Chair',
-        imageUrl: 'https://picsum.photos/800/600?random=1',
-        glbUrl: '/models/chair.glb',
-        sketchfabUrl: 'https://sketchfab.com/models/b935005e86464b0fb29477f05a3790ef/embed',
-        arUrl: '/ar/chair',
-        qrUrl: 'https://scanxr.com/post/1'
-      },
-      {
-        id: 2,
-        title: 'Futuristic Car',
-        imageUrl: 'https://picsum.photos/640/480?random=2',
-        glbUrl: '/models/car.glb',
-        arUrl: '/ar/car',
-        qrUrl: 'https://scanxr.com/post/2'
-      },
-      {
-        id: 3,
-        title: 'Modern House',
-        imageUrl: 'https://picsum.photos/1280/720?random=3',
-        glbUrl: '/models/house.glb',
-        arUrl: '/ar/house',
-        qrUrl: 'https://scanxr.com/post/3'
+    async function fetchPosts() {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/posts/all');
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const contentType = response.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+          throw new Error("Server did not return JSON");
+        }
+        
+        const data = await response.json();
+        
+        if (data.posts) {
+          setPosts(data.posts);
+        } else {
+          console.error('No posts found in response');
+          setPosts([]);
+        }
+      } catch (error) {
+        console.error('Error fetching posts:', error);
+        setPosts([]);
+      } finally {
+        setLoading(false);
       }
-    ]);
+    }
+
+    fetchPosts();
   }, []);
 
   const handleImageClick = (post) => {
-    setModal({ open: true, glbUrl: post.glbUrl, title: post.title, sketchfabUrl: post.sketchfabUrl });
+    // Navigate to post detail page
+    router.push(`/p/${post.slug}`);
   };
 
-  const handleQrClick = (qrUrl) => {
-    // For now, open QR in a new tab (later show modal with QR image)
-    window.open(qrUrl, '_blank');
+  const handleQrClick = (e, slug) => {
+    e.stopPropagation();
+    // Generate QR URL for the post
+    const postUrl = `${window.location.origin}/p/${slug}`;
+    window.open(`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(postUrl)}`, '_blank');
   };
 
-  const handleArClick = (arUrl) => {
-    // Navigate to AR view (WebAR / 3D scene)
-    router.push(arUrl);
+  const handleArClick = (e, modelUrl) => {
+    e.stopPropagation();
+    // Navigate to AR view with model URL
+    router.push(`/ar?model=${encodeURIComponent(modelUrl)}`);
   };
 
   const breakpointColumnsObj = {
@@ -73,72 +82,111 @@ export default function ExplorePage() {
   };
 
   return (
-    <div className="min-h-screen px-4 py-20 md:px-6">
-      <Masonry
-        breakpointCols={breakpointColumnsObj}
-        className="my-masonry-grid"
-        columnClassName="my-masonry-grid_column"
-      >
-        {images.map((post, index) => (
-          <motion.div
-            key={post.id}
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: index * 0.1 }}
-            viewport={{ once: true }}
-            onMouseEnter={() => setHovered(index)}
-            onMouseLeave={() => setHovered(null)}
-            className="group relative overflow-hidden rounded-2xl shadow-lg transition-all duration-300 ease-in-out cursor-pointer mb-4"
-          >
-            {/* Image */}
-            <motion.img
-              src={post.imageUrl}
-              alt={post.title}
-              className={`w-full rounded-lg object-cover transition-all duration-300 ease-in-out ${
-                hovered === null
-                  ? 'blur-0 scale-100'
-                  : hovered === index
-                  ? 'blur-0 scale-105'
-                  : 'blur-xs'
-              }`}
-              whileHover={{ scale: 1.05 }}
+    <div className="min-h-screen w-full px-4 py-20 md:px-8 lg:px-12 max-w-[1600px] mx-auto">
+      {loading ? (
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Loading posts...</p>
+          </div>
+        </div>
+      ) : posts.length === 0 ? (
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <p className="text-xl text-muted-foreground mb-2">No posts found</p>
+            <p className="text-sm text-muted-foreground">Be the first to create a post!</p>
+          </div>
+        </div>
+      ) : (
+        <Masonry
+          breakpointCols={breakpointColumnsObj}
+          className="my-masonry-grid"
+          columnClassName="my-masonry-grid_column"
+        >
+          {posts.map((post, index) => (
+            <motion.div
+              key={post.id}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: index * 0.05 }}
+              viewport={{ once: true }}
+              onMouseEnter={() => setHovered(index)}
+              onMouseLeave={() => setHovered(null)}
               onClick={() => handleImageClick(post)}
-            />
+              className="group relative overflow-hidden rounded-2xl shadow-lg transition-all duration-300 ease-in-out cursor-pointer mb-4 bg-card"
+            >
+              {/* 3D Model Viewer */}
+              <div className="w-full aspect-square bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden">
+                <ModelViewer 
+                  src={post.modelUrl} 
+                  alt={post.title}
+                  poster={post.thumbnailUrl}
+                  className="w-full h-full"
+                />
+              </div>
 
-            {/* Overlay Icons */}
-            <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              {/* AR Icon */}
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleArClick(post.arUrl);
-                }}
-                className="bg-white p-2 rounded-full shadow hover:bg-gray-100"
-              >
-                <FaVrCardboard className="text-gray-800 text-lg" />
-              </button>
+              {/* Overlay with post info */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <div className="absolute bottom-0 left-0 right-0 p-4">
+                  <h3 className="text-white font-semibold text-lg mb-1 line-clamp-2">{post.title}</h3>
+                  {post.caption && (
+                    <p className="text-white/80 text-sm line-clamp-2 mb-2">{post.caption}</p>
+                  )}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <img 
+                        src={post.user?.profile?.avatarUrl || '/api/placeholder'} 
+                        alt={post.user?.username}
+                        className="w-6 h-6 rounded-full"
+                      />
+                      <span className="text-white/90 text-sm">@{post.user?.username}</span>
+                    </div>
+                    {post.likesCount > 0 && (
+                      <div className="flex items-center gap-1 text-white/90">
+                        <FaHeart className="text-red-500" />
+                        <span className="text-sm">{post.likesCount}</span>
+                      </div>
+                    )}
+                  </div>
+                  {post.postTags && post.postTags.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {post.postTags.slice(0, 3).map((pt) => (
+                        <span 
+                          key={pt.tag.id}
+                          className="text-xs px-2 py-1 rounded-full bg-white/20 text-white"
+                        >
+                          #{pt.tag.name}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
 
-              {/* QR Icon */}
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleQrClick(post.qrUrl);
-                }}
-                className="bg-white p-2 rounded-full shadow hover:bg-gray-100"
-              >
-                <FaQrcode className="text-gray-800 text-lg" />
-              </button>
-            </div>
-          </motion.div>
-        ))}
-      </Masonry>
-      <ImageModal
-        open={modal.open}
-        onClose={() => setModal({ open: false, glbUrl: '', title: '', sketchfabUrl: '' })}
-        glbUrl={modal.glbUrl}
-        title={modal.title}
-        sketchfabUrl={modal.sketchfabUrl}
-      />
+              {/* Action Icons */}
+              <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
+                {/* AR Icon */}
+                <button
+                  onClick={(e) => handleArClick(e, post.modelUrl)}
+                  className="bg-white/90 backdrop-blur p-2 rounded-full shadow-lg hover:bg-white transition-colors"
+                  title="View in AR"
+                >
+                  <FaVrCardboard className="text-gray-800 text-lg" />
+                </button>
+
+                {/* QR Icon */}
+                <button
+                  onClick={(e) => handleQrClick(e, post.slug)}
+                  className="bg-white/90 backdrop-blur p-2 rounded-full shadow-lg hover:bg-white transition-colors"
+                  title="Generate QR Code"
+                >
+                  <FaQrcode className="text-gray-800 text-lg" />
+                </button>
+              </div>
+            </motion.div>
+          ))}
+        </Masonry>
+      )}
     </div>
   );
 }

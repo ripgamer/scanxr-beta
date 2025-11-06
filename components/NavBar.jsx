@@ -16,7 +16,7 @@ export default function NavBar() {
     { href: '/', label: 'Home', icon: Home },
     { href: '/explore', label: 'Explore', icon: Search },
     { href: '/create', label: 'Create', icon: PlusCircle },
-    { href: '/profile', label: 'Profile', icon: User, isProfile: true }, // Placeholder
+    { href: '/profile', label: 'Profile', icon: User, isProfile: true },
   ];
 
   // Handle profile click → use Clerk username
