@@ -15,6 +15,7 @@ import Component from '@/components/comp-586'
 import { ThemeProvider } from "@/components/theme-provider"
 import GlobalParticles from '@/components/mvpblocks/GlobalParticles';
 import { organizationSchema, websiteSchema } from './structured-data';
+import PageTransition from '@/components/page-transition';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -95,7 +96,9 @@ export default function RootLayout({ children }) {
             <RippleWaveLoader />
             {/* Main content */}
             <div style={{ position: 'relative', zIndex: 1 }}>
-              {children}
+              <PageTransition>
+                {children}
+              </PageTransition>
             </div>
           </ThemeProvider>
         </body>
