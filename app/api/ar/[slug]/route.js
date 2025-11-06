@@ -35,21 +35,39 @@ export async function GET(request, { params }) {
   }
 
   const ua = request.headers.get('user-agent') || ''
+
+  // Simple mode: two choices
+  // - Web (no params): redirect to the public post page `/p/{slug}`
+  // - AR (pass ?ar=1): detect platform and redirect to a native AR viewer (USDZ for iOS, Scene Viewer for Android)
+  const urlObj = new URL(request.url)
+  const sp = urlObj.searchParams
+  const wantAR = sp.get('ar') === '1' || sp.get('ar') === 'true' || sp.has('ar')
+
+  // If not requesting AR, just send the user to the web post page
+  if (!wantAR) {
+    const webUrl = origin ? `${origin}/p/${slug}` : `/p/${slug}`
+    return NextResponse.redirect(webUrl)
+  }
+
+  // Build Scene Viewer URL helper
+  const buildSceneUrl = (gltf) => `https://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(gltf)}&mode=ar_preferred`
+
+  // Platform detection
   const isIOS = /iPhone|iPad|iPod/.test(ua) && !/Android/.test(ua)
   const isAndroid = /Android/.test(ua)
 
-  // iOS Quick Look: prefer direct USDZ if available. Opening a .usdz URL in Safari will invoke Quick Look.
+  // iOS: Quick Look via USDZ
   if (isIOS && post.iosSrc) {
     return NextResponse.redirect(post.iosSrc)
   }
 
-  // Android: Scene Viewer deep link. Most modern Chrome on Android will handle this URL and launch Scene Viewer.
+  // Android: Scene Viewer via glTF/GLB
   if (isAndroid && post.modelUrl) {
-    const scene = `https://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(post.modelUrl)}&mode=ar_preferred`
+    const scene = buildSceneUrl(post.modelUrl)
     return NextResponse.redirect(scene)
   }
 
-  // Generic fallback: redirect to public post page which can attempt to auto-open AR (e.g. ?ar=1)
-  const fallbackUrl = origin ? `${origin}/p/${slug}?ar=1` : `/p/${slug}?ar=1`
-  return NextResponse.redirect(fallbackUrl)
+  // If platform detection failed or required asset missing, fallback to public page (web)
+  const fallback = origin ? `${origin}/p/${slug}` : `/p/${slug}`
+  return NextResponse.redirect(fallback)
 }
