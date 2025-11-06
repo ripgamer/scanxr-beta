@@ -1,7 +1,13 @@
+'use client'
+
 import { Button } from "@/components/ui/button"
 import { Users, UserPlus } from "lucide-react"
+import { EditProfileDialog } from "@/components/edit-profile-dialog"
+import { useUser } from "@clerk/nextjs"
 
 export function ProfileHero({ profile }) {
+  const { user } = useUser()
+  const isOwnProfile = user?.id === profile.userId
   return (
     <div className="bg-card border border-border rounded-xl p-4 sm:p-6 h-full relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-accent/5 rounded-xl" />
@@ -22,9 +28,9 @@ export function ProfileHero({ profile }) {
 
           <div className="flex-1">
             <h1 className="text-xl sm:text-2xl font-bold text-foreground mb-2">{profile.user.username}</h1>
-            <Button className="bg-primary hover:bg-primary/90 text-sm sm:text-base px-4 sm:px-6 py-2">
-              Edit Profile
-            </Button>
+            {isOwnProfile && (
+              <EditProfileDialog profile={profile} userId={profile.userId} />
+            )}
           </div>
         </div>
 
