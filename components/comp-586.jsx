@@ -1,7 +1,9 @@
 'use client';
 
-import { useId } from "react"
-import { MicIcon, SearchIcon } from "lucide-react"
+import { useId, useState, useEffect, useRef } from "react"
+import { MicIcon, SearchIcon, User, FileBox } from "lucide-react"
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 
 import Logo from "@/components/logo"
 import ThemeToggle from "@/components/theme-toggle"
@@ -14,6 +16,91 @@ import { SignUpButton } from "@clerk/nextjs";
 export default function Component() {
   const id = useId()
   const { isSignedIn } = useUser();
+  const router = useRouter()
+  
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchResults, setSearchResults] = useState({ users: [], posts: [] })
+  const [isSearching, setIsSearching] = useState(false)
+  const [showResults, setShowResults] = useState(false)
+  const searchRef = useRef(null)
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setShowResults(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  // Debounced search
+  useEffect(() => {
+    const delayDebounce = setTimeout(() => {
+      if (searchQuery.trim().length > 0) {
+        setShowResults(true)
+        performSearch(searchQuery)
+      } else {
+        setSearchResults({ users: [], posts: [] })
+        setShowResults(false)
+      }
+    }, 300)
+
+    return () => clearTimeout(delayDebounce)
+  }, [searchQuery])
+
+  const performSearch = async (query) => {
+    setIsSearching(true)
+    const isUserSearch = query.startsWith('@')
+    const searchTerm = isUserSearch ? query.slice(1) : query
+
+    console.log('Searching:', { query, isUserSearch, searchTerm })
+
+    try {
+      if (isUserSearch) {
+        // Search only users
+        const response = await fetch(`/api/search/users?q=${encodeURIComponent(searchTerm)}`)
+        const users = await response.json()
+        console.log('User results:', users)
+        setSearchResults({ users, posts: [] })
+      } else {
+        // Search posts
+        const response = await fetch(`/api/search/posts?q=${encodeURIComponent(searchTerm)}`)
+        const posts = await response.json()
+        console.log('Post results:', posts)
+        setSearchResults({ users: [], posts })
+      }
+    } catch (error) {
+      console.error('Search error:', error)
+    } finally {
+      setIsSearching(false)
+    }
+  }
+
+  const handleResultClick = () => {
+    setShowResults(false)
+    setSearchQuery('')
+  }
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && searchQuery.trim()) {
+      // Navigate to first result
+      const isUserSearch = searchQuery.startsWith('@')
+      
+      if (isUserSearch && searchResults.users.length > 0) {
+        const firstUser = searchResults.users[0]
+        router.push(`/${firstUser.profile?.slug || firstUser.username}`)
+        handleResultClick()
+      } else if (!isUserSearch && searchResults.posts.length > 0) {
+        const firstPost = searchResults.posts[0]
+        router.push(`/p/${firstPost.slug}`)
+        handleResultClick()
+      }
+    } else if (e.key === 'Escape') {
+      setShowResults(false)
+    }
+  }
 
   return (
     (<header className="fixed top-0 left-0 w-full z-[201] border-b px-2 md:px-6 bg-background/80 backdrop-blur">
@@ -28,10 +115,18 @@ export default function Component() {
           </span>
         </div>
         {/* Middle area */}
-        <div className="grow min-w-0">
+        <div className="grow min-w-0" ref={searchRef}>
           {/* Search form */}
           <div className="relative mx-auto w-full max-w-[120px] sm:max-w-[180px] md:max-w-xs">
-            <Input id={id} className="peer h-7 px-6 text-xs md:h-8 md:px-8 md:text-base" placeholder="Search..." type="search" />
+            <Input 
+              id={id} 
+              className="peer h-7 px-6 text-xs md:h-8 md:px-8 md:text-base" 
+              placeholder="Search posts or @users" 
+              type="search"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={handleKeyDown}
+            />
             <div
               className="text-muted-foreground/80 pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-2 peer-disabled:opacity-50">
               <SearchIcon size={16} />
@@ -42,6 +137,87 @@ export default function Component() {
               type="submit">
               <MicIcon size={16} aria-hidden="true" />
             </button>
+
+            {/* Search Results Dropdown */}
+            {showResults && (
+              <div className="absolute top-full left-0 right-0 mt-2 bg-background border rounded-lg shadow-lg max-h-96 overflow-y-auto z-50 min-w-[280px]">
+                {/* Loading State */}
+                {isSearching && (
+                  <div className="p-4 text-center text-muted-foreground">Searching...</div>
+                )}
+
+                {/* Users Results */}
+                {!isSearching && searchResults.users.length > 0 && (
+                  <div className="p-2">
+                    <div className="px-3 py-2 text-xs font-semibold text-muted-foreground flex items-center gap-2">
+                      <User className="h-4 w-4" />
+                      Users
+                    </div>
+                    {searchResults.users.map((user) => (
+                      <Link
+                        key={user.id}
+                        href={`/${user.profile?.slug || user.username}`}
+                        onClick={handleResultClick}
+                        className="flex items-center gap-3 px-3 py-2 hover:bg-accent rounded-md transition"
+                      >
+                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
+                          {user.profile?.avatarUrl ? (
+                            <img 
+                              src={user.profile.avatarUrl} 
+                              alt={user.username}
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            <User className="h-5 w-5 text-primary" />
+                          )}
+                        </div>
+                        <div>
+                          <div className="font-medium">@{user.username}</div>
+                          <div className="text-sm text-muted-foreground">{user.profile?.bio || 'No bio'}</div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+
+                {/* Posts Results */}
+                {!isSearching && searchResults.posts.length > 0 && (
+                  <div className="p-2">
+                    <div className="px-3 py-2 text-xs font-semibold text-muted-foreground flex items-center gap-2">
+                      <FileBox className="h-4 w-4" />
+                      Posts
+                    </div>
+                    {searchResults.posts.map((post) => (
+                      <Link
+                        key={post.id}
+                        href={`/p/${post.slug}`}
+                        onClick={handleResultClick}
+                        className="flex items-center gap-3 px-3 py-2 hover:bg-accent rounded-md transition"
+                      >
+                        <div className="h-10 w-10 rounded-md bg-primary/10 overflow-hidden">
+                          {post.thumbnailUrl ? (
+                            <img src={post.thumbnailUrl} alt={post.title} className="h-full w-full object-cover" />
+                          ) : (
+                            <div className="h-full w-full flex items-center justify-center">
+                              <FileBox className="h-5 w-5 text-primary" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium truncate">{post.title}</div>
+                          <div className="text-sm text-muted-foreground truncate">{post.caption || 'No description'}</div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+
+                {/* No Results */}
+                {!isSearching && searchResults.users.length === 0 && searchResults.posts.length === 0 && searchQuery.trim().length > 0 && (
+                  <div className="p-4 text-center text-muted-foreground">No results found</div>
+                )}
+              </div>
+            )}
           </div>
         </div>
         {/* Right side */}
