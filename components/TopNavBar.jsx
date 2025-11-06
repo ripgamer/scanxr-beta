@@ -5,12 +5,14 @@ import { Input } from '@/components/ui/input'
 import { Search, User, FileBox } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import RippleWaveLoader from '@/components/mvpblocks/ripple-loader'
 
 function TopNavBar() {
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState({ users: [], posts: [] })
   const [isSearching, setIsSearching] = useState(false)
   const [showResults, setShowResults] = useState(false)
+  const [isNavigating, setIsNavigating] = useState(false)
   const searchRef = useRef(null)
   const router = useRouter()
 
@@ -68,9 +70,11 @@ function TopNavBar() {
     }
   }
 
-  const handleResultClick = () => {
+  const handleResultClick = (path) => {
+    setIsNavigating(true)
     setShowResults(false)
     setSearchQuery('')
+    router.push(path)
   }
 
   const handleKeyDown = (e) => {
@@ -95,7 +99,11 @@ function TopNavBar() {
   }
 
   return (
-    <nav className="fixed top-0 left-0 w-full z-[201] bg-white/70 backdrop-blur-lg border-b border-primary/10 shadow-sm">
+    <>
+      {/* Loading Overlay */}
+      {isNavigating && <RippleWaveLoader />}
+
+      <nav className="fixed top-0 left-0 w-full z-[201] bg-white/70 backdrop-blur-lg border-b border-primary/10 shadow-sm">
       <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
         {/* Logo and Brand */}
         <div className="flex items-center gap-2">
@@ -132,11 +140,10 @@ function TopNavBar() {
                       Users
                     </div>
                     {searchResults.users.map((user) => (
-                      <Link
+                      <button
                         key={user.id}
-                        href={`/${user.profile?.slug || user.username}`}
-                        onClick={handleResultClick}
-                        className="flex items-center gap-3 px-3 py-2 hover:bg-secondary/20 rounded-md transition"
+                        onClick={() => handleResultClick(`/${user.profile?.slug || user.username}`)}
+                        className="w-full flex items-center gap-3 px-3 py-2 hover:bg-secondary/20 rounded-md transition text-left"
                       >
                         <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
                           {user.profile?.avatarUrl ? (
@@ -153,7 +160,7 @@ function TopNavBar() {
                           <div className="font-medium text-primary">@{user.username}</div>
                           <div className="text-sm text-primary/60">{user.profile?.bio || 'No bio'}</div>
                         </div>
-                      </Link>
+                      </button>
                     ))}
                   </div>
                 )}
@@ -166,11 +173,10 @@ function TopNavBar() {
                       Posts
                     </div>
                     {searchResults.posts.map((post) => (
-                      <Link
+                      <button
                         key={post.id}
-                        href={`/p/${post.slug}`}
-                        onClick={handleResultClick}
-                        className="flex items-center gap-3 px-3 py-2 hover:bg-secondary/20 rounded-md transition"
+                        onClick={() => handleResultClick(`/p/${post.slug}`)}
+                        className="w-full flex items-center gap-3 px-3 py-2 hover:bg-secondary/20 rounded-md transition text-left"
                       >
                         <div className="h-10 w-10 rounded-md bg-primary/10 overflow-hidden">
                           {post.thumbnailUrl ? (
@@ -185,7 +191,7 @@ function TopNavBar() {
                           <div className="font-medium text-primary truncate">{post.title}</div>
                           <div className="text-sm text-primary/60 truncate">{post.caption || 'No description'}</div>
                         </div>
-                      </Link>
+                      </button>
                     ))}
                   </div>
                 )}
@@ -204,6 +210,7 @@ function TopNavBar() {
         </div>
       </div>
     </nav>
+    </>
   )
 }
 

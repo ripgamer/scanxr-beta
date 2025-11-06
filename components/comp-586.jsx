@@ -2,7 +2,7 @@
 
 import { useId, useState, useEffect, useRef } from "react"
 import { MicIcon, SearchIcon, User, FileBox } from "lucide-react"
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 
 import Logo from "@/components/logo"
@@ -12,17 +12,25 @@ import { Input } from "@/components/ui/input"
 import Btn09 from "@/components/mvpblocks/btn-gradient1";
 import { useUser } from "@clerk/nextjs";
 import { SignUpButton } from "@clerk/nextjs";
+import RippleWaveLoader from "@/components/mvpblocks/ripple-loader";
 
 export default function Component() {
   const id = useId()
   const { isSignedIn } = useUser();
   const router = useRouter()
+  const pathname = usePathname()
   
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState({ users: [], posts: [] })
   const [isSearching, setIsSearching] = useState(false)
   const [showResults, setShowResults] = useState(false)
+  const [isNavigating, setIsNavigating] = useState(false)
   const searchRef = useRef(null)
+
+  // Stop loading when pathname changes (page loaded)
+  useEffect(() => {
+    setIsNavigating(false)
+  }, [pathname])
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -78,9 +86,11 @@ export default function Component() {
     }
   }
 
-  const handleResultClick = () => {
+  const handleResultClick = (path) => {
+    setIsNavigating(true)
     setShowResults(false)
     setSearchQuery('')
+    router.push(path)
   }
 
   const handleKeyDown = (e) => {
@@ -90,12 +100,12 @@ export default function Component() {
       
       if (isUserSearch && searchResults.users.length > 0) {
         const firstUser = searchResults.users[0]
-        router.push(`/${firstUser.profile?.slug || firstUser.username}`)
-        handleResultClick()
+        const path = `/${firstUser.profile?.slug || firstUser.username}`
+        handleResultClick(path)
       } else if (!isUserSearch && searchResults.posts.length > 0) {
         const firstPost = searchResults.posts[0]
-        router.push(`/p/${firstPost.slug}`)
-        handleResultClick()
+        const path = `/p/${firstPost.slug}`
+        handleResultClick(path)
       }
     } else if (e.key === 'Escape') {
       setShowResults(false)
@@ -103,8 +113,12 @@ export default function Component() {
   }
 
   return (
-    (<header className="fixed top-0 left-0 w-full z-[201] border-b px-2 md:px-6 bg-background/80 backdrop-blur">
-      <div className="flex h-16 items-center justify-between gap-2 md:gap-4 flex-wrap">
+    <>
+      {/* Loading Overlay */}
+      {isNavigating && <RippleWaveLoader />}
+
+      <header className="fixed top-0 left-0 w-full z-[201] border-b px-2 md:px-6 bg-background/80 backdrop-blur">
+        <div className="flex h-16 items-center justify-between gap-2 md:gap-4 flex-wrap">
         {/* Logo */}
         <div className="flex-1 min-w-0 flex items-center">
           <a href="#" className="text-primary hover:text-primary/90 block w-8 h-8 md:w-10 md:h-10">
@@ -140,7 +154,7 @@ export default function Component() {
 
             {/* Search Results Dropdown */}
             {showResults && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-background border rounded-lg shadow-lg max-h-96 overflow-y-auto z-50 min-w-[280px]">
+              <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-background border rounded-lg shadow-lg max-h-96 overflow-y-auto z-50 w-[90vw] max-w-md">
                 {/* Loading State */}
                 {isSearching && (
                   <div className="p-4 text-center text-muted-foreground">Searching...</div>
@@ -154,11 +168,10 @@ export default function Component() {
                       Users
                     </div>
                     {searchResults.users.map((user) => (
-                      <Link
+                      <button
                         key={user.id}
-                        href={`/${user.profile?.slug || user.username}`}
-                        onClick={handleResultClick}
-                        className="flex items-center gap-3 px-3 py-2 hover:bg-accent rounded-md transition"
+                        onClick={() => handleResultClick(`/${user.profile?.slug || user.username}`)}
+                        className="w-full flex items-center gap-3 px-3 py-2 hover:bg-accent rounded-md transition text-left"
                       >
                         <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
                           {user.profile?.avatarUrl ? (
@@ -175,7 +188,7 @@ export default function Component() {
                           <div className="font-medium">@{user.username}</div>
                           <div className="text-sm text-muted-foreground">{user.profile?.bio || 'No bio'}</div>
                         </div>
-                      </Link>
+                      </button>
                     ))}
                   </div>
                 )}
@@ -188,11 +201,10 @@ export default function Component() {
                       Posts
                     </div>
                     {searchResults.posts.map((post) => (
-                      <Link
+                      <button
                         key={post.id}
-                        href={`/p/${post.slug}`}
-                        onClick={handleResultClick}
-                        className="flex items-center gap-3 px-3 py-2 hover:bg-accent rounded-md transition"
+                        onClick={() => handleResultClick(`/p/${post.slug}`)}
+                        className="w-full flex items-center gap-3 px-3 py-2 hover:bg-accent rounded-md transition text-left"
                       >
                         <div className="h-10 w-10 rounded-md bg-primary/10 overflow-hidden">
                           {post.thumbnailUrl ? (
@@ -207,7 +219,7 @@ export default function Component() {
                           <div className="font-medium truncate">{post.title}</div>
                           <div className="text-sm text-muted-foreground truncate">{post.caption || 'No description'}</div>
                         </div>
-                      </Link>
+                      </button>
                     ))}
                   </div>
                 )}
@@ -235,6 +247,7 @@ export default function Component() {
           <ThemeToggle />
         </div>
       </div>
-    </header>)
+    </header>
+    </>
   );
 }
