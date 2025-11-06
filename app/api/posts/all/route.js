@@ -22,12 +22,23 @@ export async function GET() {
           include: {
             tag: true
           }
+        },
+        _count: {
+          select: {
+            likes: true
+          }
         }
       },
       take: 50 // Limit to 50 posts for performance
     });
 
-    return NextResponse.json({ posts }, { status: 200 });
+    // Transform posts to include likesCount
+    const transformedPosts = posts.map(post => ({
+      ...post,
+      likesCount: post._count?.likes || post.likesCount || 0
+    }));
+
+    return NextResponse.json({ posts: transformedPosts }, { status: 200 });
   } catch (error) {
     console.error('Error fetching posts:', error);
     return NextResponse.json(

@@ -6,6 +6,8 @@ const isPublicRoute = createRouteMatcher([
   "/sign-up(.*)",
   "/api/webhook(.*)",
   "/api/profile", // ✅ Make this route public
+  "/api/posts/all", // ✅ Make posts listing public
+  "/api/placeholder", // ✅ Make placeholder API public
   "/p/(.*)", // ✅ Make all post pages public
   "/explore", // ✅ Make explore page public
 ]);

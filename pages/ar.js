@@ -50,8 +50,8 @@ export default function ARPage() {
   return (
     <>
       <Head>
-        <title>AR Cube Demo</title>
-        <meta name="description" content="AR.js cube demo with Hiro marker" />
+        <title>ScanXR - AR Experience</title>
+        <meta name="description" content="View 3D models in augmented reality" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
       </Head>
       <AFrameScene />
