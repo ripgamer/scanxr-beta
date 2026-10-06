@@ -10,12 +10,21 @@ import { GithubIcon, LinkedinIcon, TwitterIcon } from 'lucide-react';
 const defaultMembers = [
   {
     name: 'Aakashdeep Kumar',
-    role: 'Devloper',
+    role: 'Full Stack Devloper',
     imageUrl: '/team/aakash.png',
     socialLinks: [
       { platform: 'twitter', url: 'https://twitter.com' },
       { platform: 'github', url: 'https://github.com' },
       { platform: 'linkedin', url: 'https://linkedin.com' },
+    ],
+  },
+  {
+    name: 'Pramod Dwarkunde',
+    role: 'Software Engineer',
+    imageUrl: '/team/pramod.png',
+    socialLinks: [
+      { platform: 'twitter', url: 'https://twitter.com' },
+      { platform: 'github', url: 'https://github.com' },
     ],
   },
   {
@@ -28,24 +37,17 @@ const defaultMembers = [
       { platform: 'linkedin', url: 'https://linkedin.com' },
     ],
   },
+  
   {
     name: 'Sakshi Kapure',
-    role: '',
+    role: 'Researcher',
     imageUrl: '/team/sakshi.png',
     socialLinks: [
       { platform: 'github', url: 'https://github.com' },
       { platform: 'linkedin', url: 'https://linkedin.com' },
     ],
   },
-  {
-    name: 'Pramod Dwarkunde',
-    role: 'Full Stack Developer',
-    imageUrl: '/team/pramod.png',
-    socialLinks: [
-      { platform: 'twitter', url: 'https://twitter.com' },
-      { platform: 'github', url: 'https://github.com' },
-    ],
-  }
+  
   
 ];
 
